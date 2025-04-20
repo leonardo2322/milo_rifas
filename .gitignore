@@ -1,0 +1,82 @@
+# Python
+*.pyc
+*.pyo
+*.pyd
+__pycache__/
+*.pdb
+*.log
+*.pot
+*.py[cod]
+*$py.class
+
+# Django
+*.log
+*.sqlite3
+/db.sqlite3
+*.pyc
+*.pyo
+*.pyd
+__pycache__/
+*.pdb
+*.coverage
+*.coveragerc
+nosetests.xml
+coverage.xml
+*.hypothesis/
+.env
+*.env
+*.ini
+*.cfg
+*.log
+*.pot
+*.py[cod]
+*.db
+*.db-journal
+
+# Django migrations
+*/migrations/*
+
+# Static files
+# You can also ignore specific files in static
+# /static/js/
+
+# Media files
+
+# VS Code
+.vscode/
+
+# PyCharm
+.idea/
+
+# Eclipse
+.project
+.pydevproject
+
+# macOS
+.DS_Store
+
+# Windows
+Thumbs.db
+
+# mypy
+.mypy_cache/
+
+# pytest
+.cache/
+
+# coverage.py
+.coverage
+
+# virtual environment
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# .env files
+.env
+*.env
+
+# JetBrains IDEs (PyCharm, WebStorm, etc.)
+.idea/

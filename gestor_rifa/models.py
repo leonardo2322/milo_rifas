@@ -1,0 +1,184 @@
+import io
+import os
+from django.db import models
+from django.core.validators import RegexValidator
+from django.core.files.base import ContentFile
+from django.core.exceptions import ValidationError
+from PIL import Image, UnidentifiedImageError
+
+# Create your models here.
+class Numero(models.Model):
+    numero = models.CharField(max_length=4, unique=True, validators=[
+            RegexValidator(
+                regex=r'^\d{3}$',
+                message='Debe tener exactamente 3 dígitos (ej. 007, 123, 999)',
+                code='invalid_numero'
+            )
+        ])
+    disponible = models.BooleanField(verbose_name='disponibilidad',default=True)
+    fecha = models.DateField(auto_now_add=True)
+
+    def __str__(self):
+        return self.numero
+    
+    def liberar(self):
+        """Marca el número como disponible y lo desvincula del cliente.
+        """
+        self.disponible = True
+        self.cliente = None
+        self.save()
+
+    def save(self, *args, **kwargs):
+        if not self.disponible and self.cliente:
+            raise ValueError("Este número ya está ocupado por otro cliente.")
+        super().save(*args, **kwargs)
+
+class Rifa(models.Model):
+    nombre = models.CharField(max_length=255)
+    fecha_sorteo = models.DateTimeField(null=True, blank=True)
+    descripcion = models.TextField(null=True, blank=True)
+    activa = models.BooleanField(default=True)
+    fecha = models.DateTimeField(auto_now_add=True)
+    def __str__(self):
+        return f'Rifa: {self.nombre}'
+    
+class Vehiculo(models.Model):
+    nombre = models.CharField(verbose_name="Nombre del vehiculo", max_length=50)
+    ano = models.CharField(verbose_name="Año del vehiculo", max_length=4)
+    marca = models.CharField(verbose_name="Marca del vehiculo", max_length=50)
+    modelo = models.CharField(verbose_name="Modelo del vehiculo o descripcion", max_length=150, blank=True , null=True)
+    img_p = models.ImageField(verbose_name="Imagen Principal", upload_to="media/principal/")
+    rifa = models.ForeignKey(Rifa, on_delete=models.CASCADE, related_name='premios',null=True)
+    def __str__(self):
+        return self.nombre
+
+class ImagenSecundaria(models.Model):
+    carro = models.ForeignKey(Vehiculo, related_name='imagenes_secundarias', on_delete=models.CASCADE)
+    imagen = models.ImageField(upload_to='media/carro/secundarias/')
+
+    def __str__(self):
+        return f"Imagen secundaria de {self.carro.nombre}"
+
+class Cliente(models.Model):
+    nombre = models.CharField(verbose_name='nombre',max_length=100,unique=True)
+    telefono = models.CharField(verbose_name='telefono',
+        max_length=15,  # El tamaño máximo depende del formato que vayas a usar
+        validators=[
+            RegexValidator(
+                regex=r'^\+?\d{1,3}?[ -]?\(?\d{1,4}?\)?[ -]?\d{1,4}[ -]?\d{1,4}$',  # Formato general
+                message='Número de teléfono inválido. Ejemplo: +1 (234) 567-8901 o  234-567-8901  tambien (234) 567-8901',
+                code='invalid_telefono'
+            )
+        ],
+    )
+    cedula = models.CharField(verbose_name='Cedula de identidad o dni',max_length=12, unique=True,validators=[
+            RegexValidator(
+                regex=r'^\d{1,3}([.,]?\d{3}){2,3}$',  # Permite puntos o comas entre los números
+                message='La cédula debe ser un número con 7 u 8 dígitos, opcionalmente con puntos o comas.',
+                code='invalid_cedula'
+            )
+        ])
+    estado = models.BooleanField(verbose_name='cliente activo o inactivo',default=False)
+    numeros = models.ManyToManyField(Numero, blank=True, related_name='clientes')
+    fecha_registro = models.DateTimeField(auto_now_add=True)
+    fecha_actualizacion = models.DateTimeField(auto_now=True)
+    
+
+    def __str__(self):
+        return self.nombre
+    def save(self, *args, **kwargs):
+        if self.numeros.exists():
+            for numero in self.numeros.all():
+                numero.disponible = False
+
+        return super().save(*args, **kwargs)
+
+class Cuentas_banco(models.Model):
+    nombre = models.CharField(verbose_name="nombre del banco",max_length=100, unique=True)
+    titular = models.CharField(verbose_name="titular de la cuenta",max_length=100, blank=True, null=True)
+    cedula = models.CharField(verbose_name="cedula de la cuenta",max_length=12, unique=True,validators=[
+            RegexValidator(
+                regex=r'^\d{1,3}([.,]?\d{3}){2,3}$',  # Permite puntos o comas entre los números
+                message='La cédula debe ser un número con 7 u 8 dígitos, opcionalmente con puntos o comas.',
+                code='invalid_cedula'
+            )
+        ],blank=True,
+        null=True
+        )
+    tipo = models.CharField(verbose_name="tipo de cuenta",max_length=50, choices=[
+        ('ahorros', 'Ahorros'),
+        ('corriente', 'Corriente'),
+    ], default='Corriente',
+    blank=True,
+    null=True
+    )
+    numero_cuenta = models.CharField(verbose_name="numero de cuenta",max_length=30, unique=True,
+                                     validators=[
+                RegexValidator(
+                regex=r'^[\d\s\-]{20,30}$',
+                message='El número de cuenta debe tener entre 20 y 30 caracteres, solo dígitos, espacios o guiones.',
+                code='invalid_numero_cuenta'
+        )],
+        blank=True,
+        null=True
+        )
+    telefono = models.CharField(verbose_name="telefono de la cuenta",
+        max_length=15,  # El tamaño máximo depende del formato que vayas a usar
+        validators=[
+            RegexValidator(
+                regex=r'^\+?\d{1,3}?[ -]?\(?\d{1,4}?\)?[ -]?\d{1,4}[ -]?\d{1,4}$',  # Formato general
+                message='Número de teléfono inválido. Ejemplo: +1 (234) 567-8901 o  234-567-8901  tambien (234) 567-8901',
+                code='invalid_telefono'
+            )
+        ],
+        blank=True,  # Permitir que sea opcional
+        null=True
+    )
+    correo = models.EmailField(
+        unique=True,                
+        max_length=254,             # Valor recomendado por la RFC
+        verbose_name="Correo electrónico",
+        blank=True,  # Permitir que sea opcional
+        null=True
+    )
+    logo = models.ImageField(verbose_name="imagen de la cuenta", upload_to="iconos_bancos/")
+    fecha = models.DateTimeField(auto_now_add=True)
+    fecha_actualizada = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return self.nombre
+
+class Comprobantes_de_pago(models.Model):
+    ultimos_digitos = models.CharField(verbose_name="digitos del comprobante de pago", max_length=4, unique=True, validators=[
+            RegexValidator(
+                regex=r'^\d{4}$',
+                message='Debe tener exactamente 4 dígitos (ej. 4444, 1234, 9999)',
+                code='invalid_numero'
+            )
+        ])
+    comprobante = models.ImageField(verbose_name="comprobante", upload_to="media/comprobantes/")
+    fecha = models.DateTimeField(auto_now_add=True)
+    cliente = models.ForeignKey(Cliente, on_delete=models.CASCADE, related_name='comprobantes')
+    def __str__(self):
+        return self.ultimos_digitos
+    def save(self, *args, **kwargs):
+        if self.imagen:
+            try:
+                img = Image.open(self.imagen)
+
+                if img.mode in ("RGBA", "P"):
+                    img = img.convert("RGB")
+
+                buffer = io.BytesIO()
+                img.save(buffer, format='JPEG', quality=85)
+                buffer.seek(0)
+
+                nombre_original = os.path.splitext(self.imagen.name)[0]
+                self.imagen.save(nombre_original + '.jpg', ContentFile(buffer.read()), save=False)
+
+            except UnidentifiedImageError:
+                raise ValidationError("El archivo no es una imagen válida.")
+            except Exception as e:
+                raise ValidationError(f"Ocurrió un error al procesar la imagen: {str(e)}")
+
+        super().save(*args, **kwargs)

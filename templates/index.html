@@ -1,0 +1,229 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link
+      rel="stylesheet"
+      href="{% static 'bootstrap/css/bootstrap.min.css' %}"
+    />
+    <link
+      rel="stylesheet"
+      href="{% static 'Datatables/datatables.min.css' %}"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+      integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw=="
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
+      integrity="sha512-4wZ4pFUXzY6UUV3t5XOk50XYIq6a9RUm/FslX5RfqtZ8Kj8XTf+OEVfu2oqeM5UoZsOyGzE9H+4RtpgfEVCy+A=="
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    />
+    <link rel="stylesheet" href="{% static 'css/index.css' %}" />
+    <title>Rifas Milo</title>
+  </head>
+  <body>
+    <header>
+      {% block navbar %}
+      <!-- Barra de Navegación -->
+      <nav class="navbar navbar-expand-lg" id="barraNav">
+        <div class="container">
+          <a class="navbar-brand" href="#">
+            <img
+              src="{% static 'img/paper.png' %}"
+              alt="logo"
+              class="img-fluid"
+              style="max-height: 50px"
+            />
+          </a>
+          <button
+            class="navbar-toggler"
+            type="button"
+            data-bs-toggle="collapse"
+            data-bs-target="#navbarNav"
+            aria-controls="navbarNav"
+            aria-expanded="false"
+            aria-label="Toggle navigation"
+          >
+            <span class="navbar-toggler-icon"></span>
+          </button>
+          <div
+            class="collapse navbar-collapse justify-content-center text-center"
+            id="navbarNav"
+          >
+            <ul class="navbar-nav ms-auto">
+              <li class="nav-item">
+                <a
+                  class="nav-link active text-white"
+                  aria-current="page"
+                  href="#"
+                >
+                  Vehiculo
+                </a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link text-white" href="#">Sobre Nosotros</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link text-white" href="#">Verificar Boleto</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link text-white" href="#">Contacto</a>
+              </li>
+              <li class="nav-item text-white">
+                <a href="#" class="golden-button">
+                  <span class="golden-text">Lista de boletos</span>
+                </a>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </nav>
+      {% endblock navbar %}
+    </header>
+    <main
+      id="main"
+      class="main d-flex justify-content-center align-items-center flex-column"
+    >
+      <div
+        class="container py-5 p-5 bg_layer d-flex justify-content-center align-items-center flex-column"
+      >
+        {% block content %}{% endblock %}
+      </div>
+    </main>
+    <!-- Footer -->
+    <footer class="footer-section" id="footer_Section">
+      <div id="footer" class="footer-section">
+        <div class="container footer-container">
+          <div class="col-lg-3 col-md-6 footer-logo">
+            <h3 class="footer-subsection-title clientLegalName">Rifas Milo</h3>
+            <p class="footer-susection-text">
+              <img src="" alt="Logo" />
+            </p>
+          </div>
+          <div class="col-lg-3 col-md-6 footer-subsection">
+            <div class="footer-subsection-2-1">
+              <h3 class="footer-subsection-title">Nosotros</h3>
+              <pre><p class="footer-subsection-text">Rifas Milo</p></pre>
+            </div>
+          </div>
+          <div class="col-lg-3 col-md-6 footer-subsection">
+            <h3 class="footer-subsection-title">Contacto</h3>
+            <ul class="footer-subsection-list">
+              <li class="webClient" style="display: block">
+                <a
+                  href="#"
+                  class="linkWebClient"
+                  rel="nofollow noopener noreferrer"
+                  target="_blank"
+                >
+                  www.rifasmilo.com
+                </a>
+              </li>
+              <li>Tovar estado Merida</li>
+              <li>+58 04247807293</li>
+            </ul>
+          </div>
+          <div class="col-lg-3 col-md-6 footer-subsection">
+            <div class="footer-subsection-2-2">
+              <h3 class="footer-subsection-title">Síguenos</h3>
+              <div class="footer-social-media-icons-section">
+                <a
+                  href="#"
+                  target="_blank"
+                  rel="nofollow noopener noreferrer"
+                  class="footer-social-media-icon"
+                >
+                  <i class="fa fa-facebook"></i>
+                </a>
+                <a
+                  href=""
+                  target="_blank"
+                  rel="nofollow noopener noreferrer"
+                  class="footer-social-media-icon"
+                >
+                  <i class="fa fa-instagram"></i>
+                </a>
+                <a
+                  href=""
+                  target="_blank"
+                  rel="nofollow noopener noreferrer"
+                  class="footer-social-media-icon"
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="24"
+                    height="28"
+                    fill="currentColor"
+                    class="bi bi-tiktok"
+                    viewBox="0 0 16 16"
+                  >
+                    <path
+                      d="M9 0h1.98c.144.715.54 1.617 1.235 2.512C12.895 3.389 13.797 4 15 4v2c-1.753 0-3.07-.814-4-1.829V11a5 5 0 1 1-5-5v2a3 3 0 1 0 3 3V0Z"
+                    ></path>
+                  </svg>
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- FOOTER CREDITS -->
+        <div class="container footer-credits">
+          <a href="#" target="_blank" title="Sistema de Rifas">
+            <img
+              src="{% static 'img/paper.png' %}"
+              width="166"
+              height="47"
+              alt="Sistema de Rifas"
+              class="img-fluid"
+            />
+          </a>
+          <p>
+            <span class="legalLinks">
+              <a href="#" target="_blank" rel="nofollow noopener noreferrer">
+                Condiciones
+              </a>
+              |
+              <a href="#" target="_blank" rel="nofollow noopener noreferrer">
+                Privacidad
+              </a>
+              |
+              <a href="#" target="_blank" rel="nofollow noopener noreferrer">
+                Responsabilidad
+              </a>
+            </span>
+            <br />
+            © 2025 Todos los derechos reservados.
+          </p>
+        </div>
+      </div>
+    </footer>
+
+    <script src="{% static 'JQuery/jquery.min.js' %}"></script>
+    <script src="{% static 'bootstrap/js/bootstrap.bundle.min.js' %}"></script>
+    <script src="{% static 'Datatables/datatables.min.js' %}"></script>
+    <script src="{% static 'sweetAlert/sweetalert2.all.min.js' %}"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+
+    <script>
+       {% if messages %}
+      {% for message in messages %}
+          toastr.{{ message.tags }}("{{ message }}");
+      {% endfor %}
+      {% endif %}
+    </script>
+    {% block scripts %} {% endblock scripts %}
+  </body>
+</html>
