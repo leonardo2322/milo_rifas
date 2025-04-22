@@ -23,13 +23,10 @@
       crossorigin="anonymous"
       referrerpolicy="no-referrer"
     />
-    <link
-      rel="stylesheet"
-      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
-      integrity="sha512-4wZ4pFUXzY6UUV3t5XOk50XYIq6a9RUm/FslX5RfqtZ8Kj8XTf+OEVfu2oqeM5UoZsOyGzE9H+4RtpgfEVCy+A=="
-      crossorigin="anonymous"
-      referrerpolicy="no-referrer"
-    />
+<link
+  rel="stylesheet"
+  href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
+/>
     <link rel="stylesheet" href="{% static 'css/index.css' %}" />
     <title>Rifas Milo</title>
   </head>
@@ -216,7 +213,7 @@
     <script src="{% static 'Datatables/datatables.min.js' %}"></script>
     <script src="{% static 'sweetAlert/sweetalert2.all.min.js' %}"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
-
+    <script src="{% static 'js/calc_img_slider.js' %}" ></script>
     <script>
        {% if messages %}
       {% for message in messages %}
