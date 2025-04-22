@@ -9,7 +9,8 @@ class Presentacion(ListView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        imagenes = Vehiculo.objects.first().imagenes_secundarias.all()
-        context['imagenes'] = imagenes
+        imagenes = Vehiculo.objects.first().imagenes_secundarias.all() if Vehiculo.objects.exists() else None
+        if imagenes:
+            context['imagenes'] = imagenes
         return context
 

@@ -39,6 +39,8 @@ INSTALLED_APPS = [
 
 ]
 
+DATA_UPLOAD_MAX_NUMBER_FIELDS = 10100
+
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',

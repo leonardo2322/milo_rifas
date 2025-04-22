@@ -36,12 +36,16 @@
 
 <div class="slider-container">
   <div class="slider-track">
+    {% if imagenes %}
     {% for im in imagenes %}
       <div class="slider">
         <img src="{{ im.imagen.url }}" alt="Vehículo en rifa" class="" />
        
       </div>
     {% endfor %}
+    {% else %}
+      <p>No hay imágenes disponibles.</p>
+    {% endif %}
 
     </div>
 {% endblock content %}

@@ -16,6 +16,7 @@ class Numero(models.Model):
             )
         ])
     disponible = models.BooleanField(verbose_name='disponibilidad',default=True)
+    rifa = models.ForeignKey('Rifa', on_delete=models.CASCADE, related_name='numeros', null=True, blank=True)
     fecha = models.DateField(auto_now_add=True)
 
     def __str__(self):
@@ -38,6 +39,10 @@ class Rifa(models.Model):
     fecha_sorteo = models.DateTimeField(null=True, blank=True)
     descripcion = models.TextField(null=True, blank=True)
     activa = models.BooleanField(default=True)
+    max_numeros = models.PositiveIntegerField(
+        default=999,
+        help_text="Número máximo permitido (ej. 999 ó 10000)"
+    )
     fecha = models.DateTimeField(auto_now_add=True)
     def __str__(self):
         return f'Rifa: {self.nombre}'
@@ -149,6 +154,12 @@ class Cuentas_banco(models.Model):
         return self.nombre
 
 class Comprobantes_de_pago(models.Model):
+    ESTADO_OPCIONES = [
+        ('sin_pago', 'Sin comprobante'),
+        ('pendiente', 'Pendiente de revisión'),
+        ('aprobado', 'Aprobado'),
+        ('rechazado', 'Rechazado'),
+    ]
     ultimos_digitos = models.CharField(verbose_name="digitos del comprobante de pago", max_length=4, unique=True, validators=[
             RegexValidator(
                 regex=r'^\d{4}$',
@@ -159,6 +170,8 @@ class Comprobantes_de_pago(models.Model):
     comprobante = models.ImageField(verbose_name="comprobante", upload_to="media/comprobantes/")
     fecha = models.DateTimeField(auto_now_add=True)
     cliente = models.ForeignKey(Cliente, on_delete=models.CASCADE, related_name='comprobantes')
+    rifa = models.ForeignKey(Rifa, on_delete=models.CASCADE, related_name='comprobantes',null=True,blank=True)
+    estado = models.CharField(max_length=20, choices=ESTADO_OPCIONES, default='sin_pago')
     def __str__(self):
         return self.ultimos_digitos
     def save(self, *args, **kwargs):

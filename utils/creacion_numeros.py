@@ -1,14 +1,16 @@
+
 from django.db import IntegrityError
-from UI_milo.models import Numero
+from gestor_rifa.models import Numero
 
-def crear_numeros():
-    for i in range(1000):  # Desde 0 hasta 999
-        numero = str(i).zfill(3)  # Convertir el número a cadena con 3 dígitos, ej: 000, 001, ..., 999
+def crear_numeros(rifa_nombre, max_numeros=1000):
+    """
+    Crea números del 000 al max_numeros - 1 asociados al nombre de una rifa.
+    """
 
+
+    for i in range(max_numeros):
+        numero = str(i).zfill(len(str(max_numeros - 1)))  # ej: 000, 001 ... 9999
         try:
-            # Crear el número en la base de datos
-            Numero.objects.create(numero=numero)
-            print(f"Creado número: {numero}")
+            Numero.objects.create(numero=numero, rifa=rifa_nombre)
         except IntegrityError:
-            # Si el número ya existe, ignorar el error
-            print(f"El número {numero} ya existe.")
+            print(f"El número {numero} ya existe. Verifica la base de datos.")
