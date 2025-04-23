@@ -16,7 +16,7 @@ class Numero(models.Model):
             )
         ])
     disponible = models.BooleanField(verbose_name='disponibilidad',default=True)
-    rifa = models.ForeignKey('Rifa', on_delete=models.CASCADE, related_name='numeros', null=True, blank=True)
+    rifa = models.ForeignKey('Rifa', on_delete=models.CASCADE, related_name='numeros')
     fecha = models.DateField(auto_now_add=True)
 
     def __str__(self):
