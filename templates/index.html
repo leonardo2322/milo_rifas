@@ -23,10 +23,10 @@
       crossorigin="anonymous"
       referrerpolicy="no-referrer"
     />
-<link
-  rel="stylesheet"
-  href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
-/>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
+    />
     <link rel="stylesheet" href="{% static 'css/index.css' %}" />
     <title>Rifas Milo</title>
   </head>
@@ -38,9 +38,9 @@
         <div class="container">
           <a class="navbar-brand" href="#">
             <img
-              src="{% static 'img/paper.png' %}"
+              src="{% static 'img/logo.png' %}"
               alt="logo"
-              class="img-fluid"
+              class="img-fluid rounded-circle"
               style="max-height: 50px"
             />
           </a>
@@ -64,9 +64,9 @@
                 <a
                   class="nav-link active text-white"
                   aria-current="page"
-                  href="#"
+                  href="{% url 'inicio' %}"
                 >
-                  Vehiculo
+                  Inicio
                 </a>
               </li>
               <li class="nav-item">
@@ -79,7 +79,7 @@
                 <a class="nav-link text-white" href="#">Contacto</a>
               </li>
               <li class="nav-item text-white">
-                <a href="#" class="golden-button">
+                <a href="{% url 'cliente' %}" class="golden-button">
                   <span class="golden-text">Lista de boletos</span>
                 </a>
               </li>
@@ -106,13 +106,19 @@
           <div class="col-lg-3 col-md-6 footer-logo">
             <h3 class="footer-subsection-title clientLegalName">Rifas Milo</h3>
             <p class="footer-susection-text">
-              <img src="" alt="Logo" />
+              <img
+                src="{% static 'img/logo.png' %}"
+                alt="Logo"
+                width="166"
+                height="47"
+                class="img-fluid rounded-circle"
+              />
             </p>
           </div>
           <div class="col-lg-3 col-md-6 footer-subsection">
             <div class="footer-subsection-2-1">
               <h3 class="footer-subsection-title">Nosotros</h3>
-              <pre><p class="footer-subsection-text">Rifas Milo</p></pre>
+              <pre><p class="footer-subsection-text">Empres</p></pre>
             </div>
           </div>
           <div class="col-lg-3 col-md-6 footer-subsection">
@@ -158,7 +164,7 @@
                   rel="nofollow noopener noreferrer"
                   class="footer-social-media-icon"
                 >
-                <i class="fa-brands fa-tiktok fs-3"></i>
+                  <i class="fa-brands fa-tiktok fs-3"></i>
                 </a>
               </div>
             </div>
@@ -168,27 +174,35 @@
         <!-- FOOTER CREDITS -->
         <div class="container footer-credits">
           <a href="#" target="_blank" title="Sistema de Rifas">
-            <img
-              src="{% static 'img/paper.png' %}"
-              width="166"
-              height="47"
-              alt="Sistema de Rifas"
-              class="img-fluid"
-            />
-            <br>
+            <br />
           </a>
-          <a href="" class="btn btn-success mb-5">Whatszapp <i class="fa-brands fa-whatsapp"></i></a>
+          <a href="" class="btn btn-success mb-5">
+            Whatszapp
+            <i class="fa-brands fa-whatsapp"></i>
+          </a>
           <p>
             <span class="legalLinks">
-              <a href="{% url 'condiciones' %}" target="_blank" rel="nofollow noopener noreferrer">
+              <a
+                href="{% url 'condiciones' %}"
+                target="_blank"
+                rel="nofollow noopener noreferrer"
+              >
                 Condiciones
               </a>
               |
-              <a href="{% url 'politicas' %}" target="_blank" rel="nofollow noopener noreferrer">
+              <a
+                href="{% url 'politicas' %}"
+                target="_blank"
+                rel="nofollow noopener noreferrer"
+              >
                 Privacidad
               </a>
               |
-              <a href="{% url 'terminos' %}" target="_blank" rel="nofollow noopener noreferrer">
+              <a
+                href="{% url 'terminos' %}"
+                target="_blank"
+                rel="nofollow noopener noreferrer"
+              >
                 Responsabilidad
               </a>
             </span>
@@ -204,7 +218,7 @@
     <script src="{% static 'Datatables/datatables.min.js' %}"></script>
     <script src="{% static 'sweetAlert/sweetalert2.all.min.js' %}"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
-    <script src="{% static 'js/calc_img_slider.js' %}" ></script>
+    <script src="{% static 'js/calc_img_slider.js' %}"></script>
     <script>
        {% if messages %}
       {% for message in messages %}

@@ -1,0 +1,41 @@
+{% extends "index.html" %}
+{% load static %}
+{% block content %}
+<h1 style="font-family: Lobster;text-shadow: 2px 2px 4px rgb(255, 255, 255);font-weight: bold;">Tu destino está marcado, solo falta el último paso: realiza tu pago y sella tu participación. Prepárate para cruzar la meta ganador.</h1>
+<div class="container my-4">
+  <h5 class="mb-3"><strong>Selecciona el banco para el pago a realizar:</strong></h5>
+  <div class="row row-cols-3 row-cols-sm-4 row-cols-md-4 g-3">
+    {% for banco in cuentas %}
+      <div class="col" style="min-width: 60px;">
+        <input 
+        type="radio" 
+        class="btn-check inp-banco" 
+        name="banco" id="banco{{ banco.id }}" 
+        value="{{ banco.id }}" 
+        autocomplete="off">
+        <label class="btn w-100 border rounded-3 p-2 d-flex flex-column align-items-center banco-label" 
+        for="banco{{ banco.id }}"
+        data-nombre="{{ banco.nombre }}"
+        data-titular="{{ banco.titular }}"
+        data-cedula="{{ banco.cedula }}"
+        data-tipo="{{ banco.tipo }}"
+        data-numero_cuenta="{{ banco.numero_cuenta|default:'' }}"
+        data-telefono="{{ banco.telefono|default:'' }}"
+        data-correo="{{ banco.correo|default:'' }}"
+        >
+          <img src="{{ banco.logo.url }}" class="img-fluid" alt="{{ banco.nombre }}" style="max-height: 30px;">
+          <small class="mt-1" id="label-banco-name">{{ banco.nombre }}</small>
+        </label>
+      </div>
+    {% endfor %}
+  </div>
+</div>
+
+<div id="detalles-banco" class="mt-4"></div>
+
+{% endblock content %}
+
+{% block scripts %}
+  {{ block.super }}
+  <script src="{% static 'js/seleccion_banco.js' %}"></script>
+{% endblock scripts %}

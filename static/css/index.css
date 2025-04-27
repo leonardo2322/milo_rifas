@@ -1,9 +1,14 @@
 /* From Uiverse.io by elijahgummer */
+:root {
+  --color-principal: #d37f18;
+  --fuente-principal: Arial, Helvetica, sans-serif;
+  --color-secundario: #1c1c1c;
+}
 * {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--fuente-principal);
 }
 .main {
   background-image: linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.4)),
@@ -22,7 +27,7 @@
 }
 
 #barraNav {
-  background-color: #d37f18;
+  background-color: var(--color-principal);
 }
 
 #myCarousel {
@@ -69,12 +74,12 @@
 }
 
 #footer_Section {
-  background-color: #d37f18;
+  background-color: var(--color-principal);
   color: #fef1a2;
 }
 
 .footer-section {
-  background-color: #1c1c1c;
+  background-color: var(--color-secundario);
   padding: 20px 0;
   position: relative;
   bottom: 0;
@@ -194,7 +199,33 @@
   box-shadow: 0 3px 6px rgba(0, 0, 0, 0.16), 0 3px 6px rgba(110, 80, 20, 0.4),
     inset 0 -2px 5px 1px #b17d10, inset 0 -1px 1px 3px rgba(250, 227, 133, 1);
 }
+.card-header {
+  background-color: var(--color-principal) !important;
+  padding: var(--bs-card-cap-padding-y) var(--bs-card-cap-padding-x);
+  margin-bottom: 0;
+  color: var(--bs-card-cap-color);
+  border-bottom: var(--bs-card-border-width) solid var(--bs-card-border-color);
+}
 
+.scroll-invisible {
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* Internet Explorer 10+ */
+  overflow-y: auto;
+  max-height: 80vh;
+}
+.scroll-invisible::-webkit-scrollbar {
+  display: none; /* Chrome, Safari, Opera */
+}
+
+.btn-check:checked + .banco-label {
+  background-color: #ffc107;
+  border-color: #ffc107;
+  color: #212529;
+}
+
+.banco-label small {
+  font-size: 0.8rem;
+}
 /* Botón Comenzar basado en Uiverse.io */
 
 @keyframes radial-pulse {
@@ -238,5 +269,25 @@
     text-align: center; /* Centrar el texto */
     margin: 0 auto; /* Centrar el botón horizontalmente */
     letter-spacing: 0.03em; /* Reducir más el espaciado de letras */
+  }
+}
+@media (max-width: 576px) {
+  #form-container {
+    max-width: 95% !important;
+  }
+}
+@media (min-width: 576px) {
+  .banco-label #label-banco-name {
+    font-size: 0.5em !important;
+  }
+}
+@media (min-width: 300px) {
+  .banco-label #label-banco-name {
+    font-size: 0.6em !important;
+  }
+}
+@media (min-width: 768px) {
+  .banco-label #label-banco-name {
+    font-size: 1.2rem;
   }
 }

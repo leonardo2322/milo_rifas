@@ -35,6 +35,7 @@ class Numero(models.Model):
         super().save(*args, **kwargs)
 
 class Rifa(models.Model):
+    title = models.CharField(max_length=255, default='¡Tu oportunidad de Oro! Este espectacular carro puede ser tuyo.')
     nombre = models.CharField(max_length=255)
     fecha_sorteo = models.DateTimeField(null=True, blank=True)
     descripcion = models.TextField(null=True, blank=True)
@@ -84,6 +85,7 @@ class Cliente(models.Model):
             )
         ])
     estado = models.BooleanField(verbose_name='cliente activo o inactivo',default=False)
+    direccion = models.CharField(verbose_name='direccion',max_length=255, blank=True, null=True)
     numeros = models.ManyToManyField(Numero, blank=True, related_name='clientes')
     fecha_registro = models.DateTimeField(auto_now_add=True)
     fecha_actualizacion = models.DateTimeField(auto_now=True)

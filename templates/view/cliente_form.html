@@ -1,0 +1,46 @@
+{% extends "index.html" %} 
+
+{% block content %}
+<div class="container my-5 ">
+    <h1 class="text-center mb-3 strong" style="font-family: Lobster !important;text-shadow: 2px 2px 4px rgb(255, 255, 255);font-weight: bold;"><strong>El premio ya esta esperando por alguien... y podrias ser tu. <br> ¡Dinos como encontrarte!</strong></h1>
+  <div class="row justify-content-center">
+    <div class="col-12 col-sm-11 col-md-10 d-flex justify-content-center" id="form-container">
+      <div class="card shadow-lg rounded-4 mx-auto" style="min-width: 300px;">
+        <div
+          class="card-header text-center text-white rounded-top-4"
+          id="card-header-form"
+        >
+          <h3 class="mb-0">Registra tus datos por favor para poder contactarte</h3>
+        </div>
+        <div class="card-body p-4">
+          <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            {% for field in form %}
+            <div class="mb-3">
+              <label
+                class="form-label w-100 text-center"
+                for="{{ field.id_for_label }}"
+              >
+                {{ field.label }}
+              </label>
+              {{ field }}
+              {% if field.help_text %}
+              <div class="form-text">{{ field.help_text }}</div>
+              {% endif %}
+              {% for error in field.errors %}
+              <div class="text-danger small">{{ error }}</div>
+              {% endfor %}
+            </div>
+            {% endfor %}
+            <div class="d-grid">
+              <button type="submit" class="golden-button2">
+                Guardar y continuar
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock content %}

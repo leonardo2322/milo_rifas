@@ -1,11 +1,12 @@
 {% extends "index.html" %} 
 {% load static %}
 {% block content %}
-<h1 class="title titulo-atrapante ">¡Tu oportunidad de Oro! Este espectacular carro puede ser tuyo.</h1>
+
+{% with vehiculos|first as vehiculo %}
+<h1 class="title titulo-atrapante ">{{ vehiculo.rifa.title }}</h1>
 <div id="myCarousel" class="carousel slide w-100 mt-5" >
   <div class="carousel-inner">
     <div class="carousel-item active">
-      {% with vehiculos|first as vehiculo %}
         {% if vehiculo.rifa.activa %}
           <img src="{{ vehiculo.img_p.url }}" class="d-block w-100 h-100 object-fit-cover" alt="{{ vehiculo.nombre }}">
         {% else %}
@@ -30,7 +31,7 @@
   </p>
     {% endwith %}
 
-  <p><a class="btn btn-lg golden-button" href="#">Comenzar</a></p>
+  <p><a class="btn btn-lg golden-button2" href="{% url 'cliente' %}">Comenzar A Participar</a></p>
 </div>
 
 
@@ -98,7 +99,7 @@
 </div>
 <div class="container-fluid mt-5 d-flex justify-content-center align-items-center flex-wrap flex-column" >
    <!-- From Uiverse.io by Spacious74 --> 
-  <a href="#" class="golden-button2">
+  <a href="{% url 'cliente' %}" class="golden-button2">
                   <span class="golden-text">Comenzar la compra de boletos</span>
                 </a>
 </div>
