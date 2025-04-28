@@ -1,5 +1,5 @@
 {% extends "index.html" %}
-
+{% load static %}
 {% block content %}
 <!-- templates/numeros_list.html -->
  <h1 style="font-family: Lobster;text-shadow: 2px 2px 4px rgb(255, 255, 255);font-weight: bold;">Tu destino te espera en un número.. ¿Cual sera el Tuyo?</h1>
@@ -68,3 +68,8 @@
 
 
 {% endblock content %}
+
+{% block scripts %}
+  {{ block.super }}
+  <script src="{% static 'js/gestor_consumer.js' %}"></script>
+{% endblock scripts %}

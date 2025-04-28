@@ -19,10 +19,10 @@ environ.Env.read_env(os.path.join(BASE_DIR, '.env'))
 SECRET_KEY = os.environ.get('SECRET_KEY')
 # SECURITY WARNING: don't run with debug turned on in production!
 
-DEBUG = os.environ.get('DEBUG', default=True)
+DEBUG = env.bool('DEBUG', default=True)
 
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
@@ -35,6 +35,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'debug_toolbar',
+    'channels',
     'gestor_rifa'
 
 ]
@@ -70,6 +71,7 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'milo_rifas.wsgi.application'
+ASGI_APPLICATION = 'milo_rifas.routing.application'
 
 INTERNAL_IPS = [
     "127.0.0.1",
@@ -80,8 +82,14 @@ INTERNAL_IPS = [
 DATABASES = {
     'default': env.db(),  # lee DATABASE_URL automáticamente
 }
-
-
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels_redis.core.RedisChannelLayer",
+        "CONFIG": {
+            "hosts": [("127.0.0.1", 6379)],
+        },
+    },
+}
 # Password validation
 # https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators
 
@@ -116,10 +124,15 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 STATIC_URL = '/static/'
-STATICFILES_DIRS = [
-    BASE_DIR / "static",
-]
-STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')  # Cambio: Ruta para archivos estáticos en producción
+
+if DEBUG:
+    STATICFILES_DIRS = [
+        BASE_DIR / "static",
+    ]
+else:
+    STATIC_ROOT = BASE_DIR / 'staticfiles'
+
+#STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')  # Cambio: Ruta para archivos estáticos en producción
 STATIC_TMP = os.path.join(BASE_DIR, 'static')  # Cambio: Ruta temporal para archivos estáticos
 MEDIA_URL = '/media/'
 

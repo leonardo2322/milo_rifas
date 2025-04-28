@@ -64,12 +64,17 @@ class ClienteFormView(FormView):
     def get(self, request, *args, **kwargs):
         # Verifica si ya existen los datos del cliente en la sesión
         if 'cliente_data' in request.session:
+            try:
+                cliente = Cliente.objects.get(pk=request.session['cliente_id'])
+            except Cliente.DoesNotExist:
+                print("error el usuario no existe: ", request.session['cliente_id'])
             # Si existen, redirige al success_url
             return redirect(self.success_url)
         return super().get(request, *args, **kwargs)
 
     def form_valid(self, form):
-        self.request.session['cliente_data'] = form.cleaned_data
+        cliente = form.save()
+        self.request.session['cliente_data'] = cliente.id
         return super().form_valid(form)
     
 class SeleccionarNumeroView(View):

@@ -60,7 +60,7 @@ class Vehiculo(models.Model):
 
 class ImagenSecundaria(models.Model):
     carro = models.ForeignKey(Vehiculo, related_name='imagenes_secundarias', on_delete=models.CASCADE)
-    imagen = models.ImageField(upload_to='media/carro/secundarias/')
+    imagen = models.ImageField(upload_to='carro/secundarias/')
 
     def __str__(self):
         return f"Imagen secundaria de {self.carro.nombre}"
@@ -93,12 +93,7 @@ class Cliente(models.Model):
 
     def __str__(self):
         return self.nombre
-    def save(self, *args, **kwargs):
-        if self.numeros.exists():
-            for numero in self.numeros.all():
-                numero.disponible = False
 
-        return super().save(*args, **kwargs)
 
 class Cuentas_banco(models.Model):
     nombre = models.CharField(verbose_name="nombre del banco",max_length=100, unique=True)
