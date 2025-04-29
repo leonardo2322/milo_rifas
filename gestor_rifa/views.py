@@ -1,11 +1,14 @@
+import json
+from django.http import JsonResponse
 from django.views.generic import ListView,View,FormView
+from django.views.decorators.csrf import csrf_exempt
+from django.utils.decorators import method_decorator
 from django.shortcuts import render, redirect
 from django.urls import reverse_lazy
 from django.core.paginator import Paginator
 from django.db import transaction
 from .forms import Cliente_form,ComprobanteForm
 from .models import Vehiculo, Numero,Cliente,Cuentas_banco
-
 
 class Presentacion(ListView):
     model = Vehiculo
@@ -21,40 +24,30 @@ class Presentacion(ListView):
             context['imagenes'] = imagenes
         return context
 
+class VerificarNumerosDisponiblesView(View):
+    def post(self, request, *args, **kwargs):
+        # Obtener los números seleccionados desde el body de la solicitud
+        data = json.loads(request.body)
+        numeros_seleccionados = data.get('numeros', [])
+
+        # Verificar si los números están disponibles
+        disponibles = []
+        no_disponibles = []
+        for numero in numeros_seleccionados:
+            if Numero.objects.filter(numero=numero, disponible=True).exists():
+                disponibles.append(numero)
+            else:
+                no_disponibles.append(numero)
 
 
-class ConfirmarNumerosView(View):
-    def post(self, request):
-        numero_ids = request.session.get('numeros_seleccionados', [])
-
-        if not numero_ids:
-            # No hay selección
-            return redirect('seleccionar_numero')
-
-        try:
-            with transaction.atomic():
-                # Bloqueamos solo los registros seleccionados
-                numeros = Numero.objects.select_for_update().filter(id__in=numero_ids)
-
-                # Verificamos que todos estén disponibles
-                for numero in numeros:
-                    if not numero.disponible:
-                        raise Exception(f"El número {numero.numero} ya fue tomado")
-
-                # Si todo va bien, los marcamos como no disponibles
-                for numero in numeros:
-                    numero.disponible = False
-                    numero.save()
-
-                # Aquí podrías guardar en la base de datos la relación con el cliente
-
-        except Exception as e:
-            # Puedes mostrar un mensaje o redirigir con feedback
-            print(e)
-            return redirect('seleccionar_numero')
-
-        return redirect('subir_comprobante')
-
+        # Enviar una respuesta al cliente
+        if len(disponibles) == len(numeros_seleccionados):
+            return JsonResponse({'disponibles': True})
+        else:
+           return JsonResponse({
+                'disponibles': False,
+                'no_disponibles': no_disponibles
+            })
 
 class ClienteFormView(FormView):
     template_name = 'view/cliente_form.html'
@@ -63,21 +56,33 @@ class ClienteFormView(FormView):
 
     def get(self, request, *args, **kwargs):
         # Verifica si ya existen los datos del cliente en la sesión
-        if 'cliente_data' in request.session:
-            # Si existen, redirige al success_url
+        cliente_id = request.session.get('cliente_id')
+        
+        if cliente_id:
+            try:
+                # Intenta obtener el cliente por el id de la sesión y verificar que esté activo
+                cliente = Cliente.objects.get(pk=cliente_id, estado=True)
+            except Cliente.DoesNotExist:
+                # Si no existe el cliente o no está activo
+                pass                
+            # Si el cliente existe y está activo, redirige al success_url
             return redirect(self.success_url)
+        
+        # Si no existe el cliente_id en la sesión, procede con el flujo normal
         return super().get(request, *args, **kwargs)
 
     def form_valid(self, form):
-        self.request.session['cliente_data'] = form.cleaned_data
+        cliente = form.save()
+        self.request.session['cliente_id'] = cliente.id
         return super().form_valid(form)
     
 class SeleccionarNumeroView(View):
     template_name = 'view/tabla.html'
 
     def get(self, request):
-        if 'cliente_data' not in request.session:
+        if 'cliente_id' not in request.session:
             return redirect('cliente')
+        
         numeros = Numero.objects.filter(disponible=True).order_by('numero')
 
         paginator = Paginator(numeros, 100)
@@ -86,8 +91,10 @@ class SeleccionarNumeroView(View):
         return render(request, self.template_name, {'numeros': page_obj})
     
     def post(self, request):
-        numero_id = request.POST.get('pk')
-        request.session['numero_id'] = numero_id
+        numeros_seleccionados = request.POST.get('numeros_seleccionados', '')
+        
+        if numeros_seleccionados:
+            lista_numeros = [int(n) for n in numeros_seleccionados.split(',') if n.isdigit()]
         return redirect('subir_comprobante')
 
 class SubirComprobanteView(View):
@@ -95,20 +102,20 @@ class SubirComprobanteView(View):
 
     def get(self, request):
         # or 'numero_id' not in request.session
-        if 'cliente_data' not in request.session :
+        if 'cliente_id' not in request.session :
             return redirect('cliente')
         cuentas = Cuentas_banco.objects.all()
         form = ComprobanteForm()
         return render(request, self.template_name, {'form': form, 'cuentas':cuentas})
 
     # def form_valid(self, form):
-    #     cliente_data = self.request.session.get('cliente_data')
+    #     cliente_id = self.request.session.get('cliente_id')
     #     numero_id = self.request.session.get('numero_id')
 
-    #     if not cliente_data or not numero_id:
+    #     if not cliente_id or not numero_id:
     #         return redirect('cliente_form')
 
-    #     cliente = Cliente.objects.create(**cliente_data)
+    #     cliente = Cliente.objects.create(**cliente_id)
     #     numero = Numero.objects.get(id=numero_id)
     #     cliente.numeros.add(numero)
     #     numero.disponible = False
@@ -120,7 +127,7 @@ class SubirComprobanteView(View):
     #     comprobante.save()
 
     #     # Limpiar la sesión
-    #     self.request.session.pop('cliente_data')
+    #     self.request.session.pop('cliente_id')
     #     self.request.session.pop('numero_id')
 
     #     return super().form_valid(form)

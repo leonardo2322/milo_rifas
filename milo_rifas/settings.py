@@ -34,7 +34,6 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'debug_toolbar',
     'gestor_rifa'
 
 ]
@@ -127,3 +126,12 @@ MEDIA_URL = '/media/'
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+CSRF_COOKIE_HTTPONLY = True  # Evita que JavaScript acceda al token CSRF
+CSRF_COOKIE_SECURE = True  # Solo permite que la cookie CSRF se envíe sobre HTTPS
+CSRF_COOKIE_SAMESITE = 'Lax'  # Impide que la cookie se envíe en solicitudes de terceros
+
+# Configuración de la cookie de sesión
+SESSION_COOKIE_HTTPONLY = True  # Evita que JavaScript acceda a la cookie de sesión
+SESSION_COOKIE_SECURE = True  # Solo permite que la cookie de sesión se envíe sobre HTTPS
+SESSION_COOKIE_SAMESITE = 'Lax'

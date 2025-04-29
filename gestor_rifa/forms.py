@@ -19,6 +19,19 @@ class Cliente_form(forms.ModelForm):
 class ComprobanteForm(forms.ModelForm):
     class Meta:
         model = Comprobantes_de_pago
-        fields = ['ultimos_digitos', 'comprobante', 'rifa']
+        fields = ['ultimos_digitos', 'comprobante']
         widgets = {
+            'ultimos_digitos': forms.TextInput(attrs={
+                'placeholder': 'Últimos dígitos del pago',
+                'class': 'form-control mt-3 mb-5'
+            }),
+            'comprobante': forms.ClearableFileInput(attrs={
+                'class': 'd-none',
+                'accept': 'image/*'  # Aceptar solo imágenes
+            }),
+        }
+
+        labels = {
+            'ultimos_digitos': 'Dígitos del comprobante de pago',  # Aquí lo colocas
+            'comprobante': 'Comprobante de pago',  # Aquí lo colocas
         }

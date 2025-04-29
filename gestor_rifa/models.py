@@ -53,14 +53,14 @@ class Vehiculo(models.Model):
     ano = models.CharField(verbose_name="Año del vehiculo", max_length=4)
     marca = models.CharField(verbose_name="Marca del vehiculo", max_length=50)
     modelo = models.CharField(verbose_name="Modelo del vehiculo o descripcion", max_length=150, blank=True , null=True)
-    img_p = models.ImageField(verbose_name="Imagen Principal", upload_to="media/principal/")
+    img_p = models.ImageField(verbose_name="Imagen Principal", upload_to="principal/")
     rifa = models.ForeignKey(Rifa, on_delete=models.CASCADE, related_name='premios',null=True)
     def __str__(self):
         return self.nombre
 
 class ImagenSecundaria(models.Model):
     carro = models.ForeignKey(Vehiculo, related_name='imagenes_secundarias', on_delete=models.CASCADE)
-    imagen = models.ImageField(upload_to='media/carro/secundarias/')
+    imagen = models.ImageField(upload_to='carro/secundarias/')
 
     def __str__(self):
         return f"Imagen secundaria de {self.carro.nombre}"
@@ -93,12 +93,7 @@ class Cliente(models.Model):
 
     def __str__(self):
         return self.nombre
-    def save(self, *args, **kwargs):
-        if self.numeros.exists():
-            for numero in self.numeros.all():
-                numero.disponible = False
 
-        return super().save(*args, **kwargs)
 
 class Cuentas_banco(models.Model):
     nombre = models.CharField(verbose_name="nombre del banco",max_length=100, unique=True)
@@ -169,7 +164,7 @@ class Comprobantes_de_pago(models.Model):
                 code='invalid_numero'
             )
         ])
-    comprobante = models.ImageField(verbose_name="comprobante", upload_to="media/comprobantes/")
+    comprobante = models.ImageField(verbose_name="comprobante", upload_to="comprobantes/")
     fecha = models.DateTimeField(auto_now_add=True)
     cliente = models.ForeignKey(Cliente, on_delete=models.CASCADE, related_name='comprobantes')
     rifa = models.ForeignKey(Rifa, on_delete=models.CASCADE, related_name='comprobantes',null=True,blank=True)

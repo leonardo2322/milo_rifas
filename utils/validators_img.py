@@ -33,3 +33,10 @@ def redimensionar_y_recortar(imagen_path, salida_path, tamaño=(500, 500)):
     
 # Ejemplo:
 redimensionar_y_recortar(r"C:\Users\leonardo\Desktop\milo\milo_rifas\utils\m5.jpg", "m2.jpg")
+def marcar_numero_seleccionado(self, numero_id, channel_name, cliente):
+        try:
+            numero = Numero.objects.get(pk=numero_id, disponible=True)
+            numero.disponible = False
+            numero.seleccionado_por_canal = channel_name
+            numero.cliente = cliente # Asocia el cliente al número
+            numero.save()

@@ -1,70 +1,83 @@
 {% extends "index.html" %}
+{% load static %}
 
 {% block content %}
-<!-- templates/numeros_list.html -->
- <h1 style="font-family: Lobster;text-shadow: 2px 2px 4px rgb(255, 255, 255);font-weight: bold;">Tu destino te espera en un número.. ¿Cual sera el Tuyo?</h1>
-<div class="container my-5 bg-dark rounded-4 shadow-lg " style="min-width: 260px;width: fit-content; margin: 0 auto;">
-  <div class="row justify-content-center" >
+<h1 style="font-family: Lobster; text-shadow: 2px 2px 4px rgb(255, 255, 255); font-weight: bold;">
+  Tu destino te espera en un número... ¿Cuál será el tuyo?
+</h1>
+
+<div class="container my-5 bg-dark rounded-4 shadow-lg" style="min-width: 260px; width: fit-content; margin: 0 auto;">
+  <div class="row justify-content-center">
     <div class="col-auto">
       <h3 class="text-center text-white mb-4">Selecciona tu número</h3>
-      <div class="row row-cols-5 g-1 scroll-invisible mx-auto" style="max-height: 80vh; overflow-y: auto; margin: 0 auto;">
+
+      <!-- Botones de números -->
+      <div class="row row-cols-5 g-1 scroll-invisible mx-auto" style="max-height: 80vh; overflow-y: auto;">
         {% for numero in numeros %}
           <div class="col">
-            <form method="post" action="">
-              {% csrf_token %}
-              <button 
-              type="button" 
+            <button 
+              type="button"
               class="btn w-100 p-1 fs-7 
                 {% if numero.disponible %}
                   btn-outline-warning
                 {% else %}
                   btn-secondary disabled
-                {% endif %}
-              "
+                {% endif %}"
               id="numero_{{ numero.id }}"
-              data-numero="{{ numero.id }}"
-              onclick="toggleSelection(this)"
-              >
-                {{ numero.numero }}
-              </button>
-            </form>
+              data-numero="{{ numero.numero }}"
+              onclick="toggleSelection(this)">
+              {{ numero.numero }}
+            </button>
           </div>
         {% endfor %}
       </div>
 
+
+
       <!-- Paginación -->
       <div class="d-flex justify-content-center mt-4">
-  <nav class="w-100">
-    <ul class="pagination justify-content-center flex-wrap flex-md-nowrap overflow-auto" style="white-space: nowrap;">
-      {% if numeros.has_previous %}
-        <li class="page-item">
-          <a class="page-link bg-warning  text-muted" href="?page=1">&laquo; Primera</a>
-        </li>
-        <li class="page-item">
-          <a class="page-link text-muted" href="?page={{ numeros.previous_page_number }}">Anterior</a>
-        </li>
-      {% endif %}
+        <nav class="w-100">
+          <ul class="pagination justify-content-center flex-wrap flex-md-nowrap overflow-auto" style="white-space: nowrap;">
+            {% if numeros.has_previous %}
+              <li class="page-item">
+                <a class="page-link bg-warning text-muted" href="?page=1">&laquo; Primera</a>
+              </li>
+              <li class="page-item">
+                <a class="page-link text-muted" href="?page={{ numeros.previous_page_number }}">Anterior</a>
+              </li>
+            {% endif %}
 
-      <li class="page-item disabled">
-        <span class="page-link">Página {{ numeros.number }} de {{ numeros.paginator.num_pages }}</span>
-      </li>
+            <li class="page-item disabled">
+              <span class="page-link">Página {{ numeros.number }} de {{ numeros.paginator.num_pages }}</span>
+            </li>
 
-      {% if numeros.has_next %}
-        <li class="page-item">
-          <a class="page-link text-muted" href="?page={{ numeros.next_page_number }}">Siguiente</a>
-        </li>
-        <li class="page-item">
-          <a class="page-link bg-warning  text-muted" href="?page={{ numeros.paginator.num_pages }}">Última &raquo;</a>
-        </li>
-      {% endif %}
-    </ul>
-  </nav>
-</div>
+            {% if numeros.has_next %}
+              <li class="page-item">
+                <a class="page-link text-muted" href="?page={{ numeros.next_page_number }}">Siguiente</a>
+              </li>
+              <li class="page-item">
+                <a class="page-link bg-warning text-muted" href="?page={{ numeros.paginator.num_pages }}">Última &raquo;</a>
+              </li>
+            {% endif %}
+          </ul>
+        </nav>
+      </div>
+
     </div>
   </div>
 </div>
- <p><strong>Ya estas a un paso.. ten en cuenta que para comprar con otros datos debes finalizar este proceso</strong></p>
-
-
+      <!-- Formulario de selección -->
+      <form method="post" action="" class="mt-4 mb-4 text-center">
+        <input type="hidden" id="csrf-token" value="{{ csrf_token }}">
+        <button type="button" class="golden-button2" onclick="verificarDisponibilidadYFinalizar(event)">Confirmar selección</button>
+      </form>
+<p><strong>Ya estás a un paso... Recuerda que para comprar con otros datos debes finalizar este proceso.</strong></p>
 
 {% endblock content %}
+
+{% block scripts %}
+{{ block.super }}
+<script src="{% static 'js/select_number.js' %}"></script>
+<script src="{% static 'js/local_verificacion.js' %}"></script>
+
+{% endblock scripts %}

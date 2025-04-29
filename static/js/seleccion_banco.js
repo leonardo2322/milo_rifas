@@ -13,48 +13,48 @@ document.addEventListener("DOMContentLoaded", () => {
       const telefono = this.dataset.telefono || "";
       const correo = this.dataset.correo || "";
 
-      let detallesHtml = `<h5>Detalles de <em>${nombre}</em>:</h5><ul class="list-group" style=" background-color:;">`;
+      let detallesHtml = `<h5 class="text-center">Detalles de ${nombre}:</h5><ul class="list-group bg-transparent p-5 text-center " style="max-width: 100%;">`;
 
-      if (cuenta) {
+      if (cuenta && cuenta !== "None") {
         detallesHtml += `
-    <li class="list-group-item d-flex justify-content-between align-items-center">
+    <li class="list-group-item bg-transparent d-flex justify-content-between align-items-center">
       <span><strong>Cuenta:</strong> ${cuenta}</span>
-      <button class="btn btn-sm btn-outline-primary copiar-btn" data-text="${cuenta}">Copiar</button>
+      <button class="btn btn-sm btn-outline-primary copiar-btn ms-2" data-text="${cuenta}">Copiar</button>
     </li>`;
       }
-      if (titular) {
+      if (titular && titular !== "None") {
         detallesHtml += `
-    <li class="list-group-item d-flex justify-content-between align-items-center">
+    <li class="list-group-item bg-transparent d-flex justify-content-between align-items-center">
       <span><strong>Titular:</strong> ${titular}</span>
-      <button class="btn btn-sm btn-outline-primary copiar-btn" data-text="${titular}">Copiar</button>
+      <button class="btn btn-sm btn-outline-primary copiar-btn ms-3" data-text="${titular}">Copiar</button>
     </li>`;
       }
-      if (tipo) {
+      if (tipo && tipo !== "None") {
         detallesHtml += `
-    <li class="list-group-item d-flex justify-content-between align-items-center">
+    <li class="list-group-item bg-transparent d-flex justify-content-between align-items-center">
       <span><strong>Tipo:</strong> ${tipo}</span>
-      <button class="btn btn-sm btn-outline-primary copiar-btn" data-text="${tipo}">Copiar</button>
+      <button class="btn btn-sm btn-outline-primary copiar-btn ms-3" data-text="${tipo}">Copiar</button>
     </li>`;
       }
-      if (cedula) {
+      if (cedula && cedula !== "None") {
         detallesHtml += `
-    <li class="list-group-item d-flex justify-content-between align-items-center">
+    <li class="list-group-item bg-transparent d-flex justify-content-between align-items-center">
       <span><strong>Cédula:</strong> ${cedula}</span>
-      <button class="btn btn-sm btn-outline-primary copiar-btn" data-text="${cedula}">Copiar</button>
+      <button class="btn btn-sm btn-outline-primary copiar-btn ms-3" data-text="${cedula}">Copiar</button>
     </li>`;
       }
-      if (telefono) {
+      if (telefono && telefono !== "None") {
         detallesHtml += `
-    <li class="list-group-item d-flex justify-content-between align-items-center">
-      <span><strong>Teléfono:</strong> ${telefono}</span>
-      <button class="btn btn-sm btn-outline-primary copiar-btn" data-text="${telefono}">Copiar</button>
+    <li class="list-group-item bg-transparent d-flex justify-content-between align-items-center">
+      <span><strong>Teléfono:</strong> ${telefono} </span>
+      <button class="btn btn-sm btn-outline-primary copiar-btn ms-3" data-text="${telefono}">Copiar</button>
     </li>`;
       }
-      if (correo) {
+      if (correo && correo !== "None") {
         detallesHtml += `
-    <li class="list-group-item d-flex justify-content-between align-items-center">
+    <li class="list-group-item bg-transparent d-flex justify-content-between align-items-center">
       <span><strong>Correo:</strong> ${correo}</span>
-      <button class="btn btn-sm btn-outline-primary copiar-btn" data-text="${correo}">Copiar</button>
+      <button class="btn btn-sm btn-outline-primary copiar-btn ms-3" data-text="${correo}">Copiar</button>
     </li>`;
       }
 
