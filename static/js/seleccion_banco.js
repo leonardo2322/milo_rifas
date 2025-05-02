@@ -1,8 +1,7 @@
 document.addEventListener("DOMContentLoaded", () => {
   const banco_name = document.querySelectorAll(".banco-label");
   const detallesContainer = document.getElementById("detalles-banco");
-  const botonesCopiar = detallesContainer.querySelectorAll(".copiar-btn");
-
+  console.log("Botones de copiar:", detallesContainer); // Para depuración
   banco_name.forEach((banco_name) => {
     banco_name.addEventListener("click", function () {
       const nombre = this.dataset.nombre || "";
@@ -63,9 +62,10 @@ document.addEventListener("DOMContentLoaded", () => {
       detallesContainer.innerHTML = detallesHtml;
     });
   });
-
-  botonesCopiar.forEach((boton) => {
-    boton.addEventListener("click", () => {
+  detallesContainer.addEventListener("click", (e) => {
+    const boton = e.target.closest(".copiar-btn");
+    console.log("Botón de copiar clicado:", boton); // Para depuración
+    if (boton) {
       const texto = boton.getAttribute("data-text");
       navigator.clipboard
         .writeText(texto)
@@ -78,6 +78,6 @@ document.addEventListener("DOMContentLoaded", () => {
         .catch((err) => {
           console.error("Error al copiar:", err);
         });
-    });
+    }
   });
 });

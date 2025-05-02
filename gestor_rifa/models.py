@@ -2,10 +2,20 @@ import io
 import os
 from django.db import models
 from django.core.validators import RegexValidator
-from django.core.files.base import ContentFile
-from django.core.exceptions import ValidationError
-from PIL import Image, UnidentifiedImageError
+from django.contrib.auth.models import User
 
+class PerfilUsuario(models.Model):
+    usuario = models.OneToOneField(User, on_delete=models.CASCADE, related_name='perfil',blank=True, null=True)
+    permisos_especiales = models.ManyToManyField('auth.Permission', blank=True)
+    telefono = models.CharField(max_length=15, verbose_name='telefono',validators=[
+            RegexValidator(
+                regex=r'^\+?\d{1,3}?[ -]?\(?\d{1,4}?\)?[ -]?\d{1,4}[ -]?\d{1,4}$',  # Formato general
+                message='Número de teléfono inválido. Ejemplo: +1 (234) 567-8901 o  234-567-8901  tambien (234) 567-8901',
+                code='invalid_telefono'
+            )
+        ])
+    def __str__(self):
+        return f"Perfil de {self.usuario.username}"
 # Create your models here.
 class Numero(models.Model):
     numero = models.CharField(max_length=4, unique=True, validators=[
@@ -29,10 +39,6 @@ class Numero(models.Model):
         self.cliente = None
         self.save()
 
-    def save(self, *args, **kwargs):
-        if not self.disponible and self.cliente:
-            raise ValueError("Este número ya está ocupado por otro cliente.")
-        super().save(*args, **kwargs)
 
 class Rifa(models.Model):
     title = models.CharField(max_length=255, default='¡Tu oportunidad de Oro! Este espectacular carro puede ser tuyo.')
@@ -66,7 +72,7 @@ class ImagenSecundaria(models.Model):
         return f"Imagen secundaria de {self.carro.nombre}"
 
 class Cliente(models.Model):
-    nombre = models.CharField(verbose_name='nombre',max_length=100,unique=True)
+    nombre = models.CharField(verbose_name='nombre',max_length=100)
     telefono = models.CharField(verbose_name='telefono',
         max_length=15,  # El tamaño máximo depende del formato que vayas a usar
         validators=[
@@ -77,7 +83,7 @@ class Cliente(models.Model):
             )
         ],
     )
-    cedula = models.CharField(verbose_name='Cedula de identidad o dni',max_length=12, unique=True,validators=[
+    cedula = models.CharField(verbose_name='Cedula de identidad o dni puede llevar (. o , ej: 25.538.992)',max_length=12, unique=True,validators=[
             RegexValidator(
                 regex=r'^\d{1,3}([.,]?\d{3}){2,3}$',  # Permite puntos o comas entre los números
                 message='La cédula debe ser un número con 7 u 8 dígitos, opcionalmente con puntos o comas.',
@@ -93,7 +99,11 @@ class Cliente(models.Model):
 
     def __str__(self):
         return self.nombre
-
+    def save(self, *args, **kwargs):
+        # Eliminar puntos y comas antes de guardar
+        if self.cedula:
+            self.cedula = self.cedula.replace('.', '').replace(',', '')
+        super().save(*args, **kwargs)
 
 class Cuentas_banco(models.Model):
     nombre = models.CharField(verbose_name="nombre del banco",max_length=100, unique=True)
@@ -171,24 +181,3 @@ class Comprobantes_de_pago(models.Model):
     estado = models.CharField(max_length=20, choices=ESTADO_OPCIONES, default='sin_pago')
     def __str__(self):
         return self.ultimos_digitos
-    def save(self, *args, **kwargs):
-        if self.imagen:
-            try:
-                img = Image.open(self.imagen)
-
-                if img.mode in ("RGBA", "P"):
-                    img = img.convert("RGB")
-
-                buffer = io.BytesIO()
-                img.save(buffer, format='JPEG', quality=85)
-                buffer.seek(0)
-
-                nombre_original = os.path.splitext(self.imagen.name)[0]
-                self.imagen.save(nombre_original + '.jpg', ContentFile(buffer.read()), save=False)
-
-            except UnidentifiedImageError:
-                raise ValidationError("El archivo no es una imagen válida.")
-            except Exception as e:
-                raise ValidationError(f"Ocurrió un error al procesar la imagen: {str(e)}")
-
-        super().save(*args, **kwargs)
