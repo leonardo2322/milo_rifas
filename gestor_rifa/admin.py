@@ -3,7 +3,7 @@ from django.urls import path
 from django.shortcuts import redirect,render
 from django.contrib import messages
 
-from .models import Numero, Cuentas_banco, Cliente, Comprobantes_de_pago, Vehiculo, ImagenSecundaria, Rifa
+from .models import Numero, Cuentas_banco, Cliente, Comprobantes_de_pago, Vehiculo, ImagenSecundaria, Rifa,PerfilUsuario
 from .forms import SeleccionRifaForm
 from utils.creacion_numeros import crear_numeros
 # Register your models here.
@@ -51,7 +51,7 @@ class NumeroAdmin(admin.ModelAdmin):
         return super().changelist_view(request, extra_context)
 
 admin.site.register(Numero, NumeroAdmin)
-
+admin.site.register(PerfilUsuario)
 admin.site.register(Cliente)
 admin.site.register(Comprobantes_de_pago)
 admin.site.register(Cuentas_banco)

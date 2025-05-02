@@ -28,9 +28,13 @@ class Numero(models.Model):
     disponible = models.BooleanField(verbose_name='disponibilidad',default=True)
     rifa = models.ForeignKey('Rifa', on_delete=models.CASCADE, related_name='numeros')
     fecha = models.DateField(auto_now_add=True)
-
+    class Meta: 
+        ordering = ['-numero']
     def __str__(self):
-        return self.numero
+        if self.rifa:
+            return f'Número: {self.numero} - Rifa: {self.rifa.nombre} - {'disponible'if self.disponible else 'ocupado'}'
+        else:
+            return f'numeros:{ self.numero} - sin rifa asignada - {'disponible'if self.disponible else 'ocupado'}'
     
     def liberar(self):
         """Marca el número como disponible y lo desvincula del cliente.
@@ -98,7 +102,7 @@ class Cliente(models.Model):
     
 
     def __str__(self):
-        return self.nombre
+        return f'cliente: {self.nombre} - numeros: {", ".join([str(numero.numero) for numero in self.numeros.all()]) if self.numeros.exists() else "sin numeros"} '
     def save(self, *args, **kwargs):
         # Eliminar puntos y comas antes de guardar
         if self.cedula:
@@ -180,4 +184,7 @@ class Comprobantes_de_pago(models.Model):
     rifa = models.ForeignKey(Rifa, on_delete=models.CASCADE, related_name='comprobantes',null=True,blank=True)
     estado = models.CharField(max_length=20, choices=ESTADO_OPCIONES, default='sin_pago')
     def __str__(self):
-        return self.ultimos_digitos
+        if self.cliente:
+            return f"Comprobante de {self.cliente.nombre} - {self.ultimos_digitos} - identificacion {self.cliente.cedula}"
+        else:
+            return f'{self.ultimos_digitos} aun no asignado a un cliente'
