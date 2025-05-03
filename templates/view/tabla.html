@@ -31,7 +31,6 @@
             class="btn-numeros btn w-100 p-1 fs-7 {% if numero.disponible %} btn-outline-warning {% else %} btn-outline-secondary disabled {% endif %}"
             id="numero_{{ numero.id }}"
             data-numero="{{ numero.numero }}"
-            
           >
             {{ numero.numero }}
           </button>
@@ -98,11 +97,7 @@
   <input type="hidden" id="input-numeros" name="numeros" />
   <input type="hidden" id="time_stamp" name="timestamp_registro" />
 
-  <button
-    type="button"
-    class="golden-button2"
-    id="btn-finalizar"
-  >
+  <button type="button" class="golden-button2" id="btn-finalizar">
     Confirmar selección
   </button>
 </form>
@@ -114,9 +109,8 @@
 </p>
 
 {% endblock content %} 
-{% block scripts %} 
-{{ block.super }}
+{% block scripts %}
+ {{ block.super }}
 <script type="module" src="{% static 'js/select_number.js' %}"></script>
-<script src="{% static 'js/local_verificacion.js' %}"></script>
 
 {% endblock scripts %}

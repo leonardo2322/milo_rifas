@@ -11,7 +11,7 @@ from django.shortcuts import get_object_or_404
 from django.core.exceptions import ValidationError
 from django.contrib import messages
 from .forms import Cliente_form,ComprobanteForm
-from .models import Vehiculo, Numero,Cliente,Cuentas_banco
+from .models import Vehiculo, Numero,Cliente,Cuentas_banco,PerfilUsuario
 from utils.validators_img import validar_formato_imagen
 
 TIEMPO_EXPIRACION = timezone.timedelta(hours=2)
@@ -49,10 +49,15 @@ class Presentacion(ListView):
         return Vehiculo.objects.filter(rifa__activa=True)
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        superuser_perfil = PerfilUsuario.objects.get(usuario__is_superuser=True)
+        telefono_superuser = superuser_perfil.telefono
+        print(telefono_superuser,"telefono superuser")
         imagenes = Vehiculo.objects.first().imagenes_secundarias.all() if Vehiculo.objects.exists() else None
         mensaje = "Hola, estoy interesado en comprar un boleto de la rifa. ¿Podrías ayudarme?";
         if imagenes:
             context['imagenes'] = imagenes
+        context['mensaje'] = mensaje
+        context['usuario_tlfn'] = telefono_superuser
         return context
 
 class VerificarNumerosDisponiblesView(View):

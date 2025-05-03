@@ -43,6 +43,12 @@ class Numero(models.Model):
         self.cliente = None
         self.save()
 
+class Imagen_bn_impresion(models.Model):
+    imagen = models.ImageField(upload_to='impresion/')
+    creado_en = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Imagen #{self.id}"
 
 class Rifa(models.Model):
     title = models.CharField(max_length=255, default='¡Tu oportunidad de Oro! Este espectacular carro puede ser tuyo.')

@@ -44,7 +44,7 @@
   {% endif %}
 </div>
 <div id="pago-form" class="container my-4" >
-  <form action="" class="form d-flex flex-column justify-content-center align-items-center" method="POST" enctype="multipart/form-data">
+  <form action="" class="form d-flex flex-column justify-content-center align-items-center" method="POST" enctype="multipart/form-data" novalidate>
     {% csrf_token %}
 {% for item in form %}
   {% if item.name == 'comprobante' %}
@@ -57,9 +57,11 @@
         <div class="text">
           <span id="file-name">Click para subir imagen</span>
         </div>
-        <input type="file" class="d-none input-archivo" id="{{ item.id_for_label }}" name="{{ item.name }}" />
+        <input type="file" class="d-none input-archivo" id="{{ item.id_for_label }}" name="{{ item.name }}"  required />
       </label>
     </div>
+      <small id="file-error" class="text-danger d-none">Debes ingresar el comprobante</small>
+
   {% else %}
   <label for="{{ item.id_for_label }}">
     {{ item.field.widget.attrs.placeholder }}
@@ -82,7 +84,7 @@
 document.addEventListener("DOMContentLoaded", function () {
   const fileInput = document.querySelector(".input-archivo");
   const fileNameSpan = document.getElementById("file-name");
-
+const fileError = document.getElementById("file-error");
   fileInput.addEventListener("change", function () {
     if (fileInput.files.length > 0) {
       fileNameSpan.textContent = fileInput.files[0].name;
@@ -90,6 +92,24 @@ document.addEventListener("DOMContentLoaded", function () {
       fileNameSpan.textContent = "Click para subir imagen";
     }
   });
+fileInput.closest("form").addEventListener("submit", function (event) {
+      console.log("submit")
+      if (!fileInput.files.length) {
+        event.preventDefault(); // evita que se envíe
+        fileError.classList.remove("d-none"); // muestra el error
+
+      } else {
+        fileError.classList.add("d-none"); // oculta el error si hay un archivo seleccionado
+      }
+    });
+
+    // Opcional: ocultar el error al seleccionar un archivo
+    fileInput.addEventListener("change", function () {
+      if (fileInput.files.length > 0) {
+        fileError.classList.add("d-none"); // oculta el error si hay un archivo seleccionado
+      }
+    });
+
 });
   </script>
 {% endblock scripts %}

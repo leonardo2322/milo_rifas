@@ -1,8 +1,10 @@
+import json
 from django.contrib import admin
 from django.urls import path
 from django.shortcuts import redirect,render
+from django.contrib.staticfiles.storage import staticfiles_storage
 from django.contrib import messages
-
+from django.utils.safestring import mark_safe
 from .models import Numero, Cuentas_banco, Cliente, Comprobantes_de_pago, Vehiculo, ImagenSecundaria, Rifa,PerfilUsuario
 from .forms import SeleccionRifaForm
 from utils.creacion_numeros import crear_numeros
@@ -50,10 +52,77 @@ class NumeroAdmin(admin.ModelAdmin):
         extra_context['extra_button'] = True
         return super().changelist_view(request, extra_context)
 
+
+class ComprobantesDePagoAdmin(admin.ModelAdmin):
+    list_display = ['ultimos_digitos', 'mostrar_imagen_con_url', 'fecha', 'cliente_nombre', 'rifa_nombre', 'estado']
+    readonly_fields = ['mostrar_imagen_con_url', 'fecha', 'cliente', 'rifa'] # Hacer estos campos solo lectura en la edición
+
+    def mostrar_imagen_con_url(self, obj):
+        if obj.comprobante:
+            return mark_safe(f'<p>URL: <a href="{obj.comprobante.url}" target="_blank">{obj.comprobante.url}</a></p>'
+                             f'<img src="{obj.comprobante.url}" alt="{obj.comprobante.name}" style="max-height: 200px; max-width: 200px;">')
+        else:
+            return "Sin comprobante"
+    mostrar_imagen_con_url.short_description = 'Comprobante'
+
+    def cliente_nombre(self, obj):
+        return obj.cliente.nombre if obj.cliente else "Sin cliente"
+    cliente_nombre.short_description = 'Cliente'
+    cliente_nombre.admin_order_field = 'cliente__nombre' # Permite ordenar por el nombre del cliente
+
+    def rifa_nombre(self, obj):
+        return obj.rifa.nombre if obj.rifa else "Sin rifa"
+    rifa_nombre.short_description = 'Rifa'
+    rifa_nombre.admin_order_field = 'rifa__nombre' # Permite ordenar por el nombre de la rifa
+
+
+class ClienteAdmin(admin.ModelAdmin):
+    list_display = ('nombre', 'cedula', 'telefono', 'estado', 'generar_factura_button')
+    readonly_fields = ('generar_factura_button',)
+
+    def generar_factura_button(self, obj):
+        if obj and obj.pk :
+            tiene_comprobante_aprobado = obj.comprobantes.filter(estado='aprobado').exists()
+            if tiene_comprobante_aprobado:
+                try:
+                    rifa_activa = Rifa.objects.filter(activa=True).first()
+                    vehiculo_activo = None
+                    if rifa_activa:
+                        vehiculo_activo = rifa_activa.premios.first()
+                        if vehiculo_activo and vehiculo_activo.img_p and hasattr(vehiculo_activo.img_p, 'url'):
+                            logo_url = vehiculo_activo.img_p.url
+                        else:
+                            logo_url = staticfiles_storage.url('img/vehiculos/carro.webp')
+                except Exception as e:
+                    logo_url = staticfiles_storage.url('img/vehiculos/carro.webp')
+                nombre_imagen = json.dumps(logo_url)
+                nombre_cliente = json.dumps(obj.nombre)
+                numeros_cliente = json.dumps(', '.join([str(num.numero) for num in obj.numeros.all()]))
+                
+                
+                return mark_safe(
+                    f'<button id="descargar-factura-{obj.pk}">Descargar Factura</button>'
+                    f'<script>document.addEventListener("DOMContentLoaded", function() {{'
+                    f'  const descargarBtn = document.getElementById("descargar-factura-{obj.pk}");'
+                    f'  if (descargarBtn) {{'
+                    f'    descargarBtn.addEventListener("click", function(event) {{'
+                    f'      event.preventDefault();'
+                    f'      const nombreImagen = {nombre_imagen};'
+                    f'      const nombreCliente = {nombre_cliente};'
+                    f'      const numerosCliente = {numeros_cliente};' 
+                    f'      const descripcionNumeros = "Números asignados: " + {numeros_cliente};'
+                    f'      descargarFactura(nombreImagen, nombreCliente, descripcionNumeros);'
+                    f'    }});'
+                    f'  }}'
+                    f'}});</script>'
+                )
+            return "Guardar el cliente para generar la lista de números"
+    generar_factura_button.short_description = 'Generar Lista de Números'  
+
+admin.site.register(Comprobantes_de_pago, ComprobantesDePagoAdmin)
+admin.site.register(Cliente, ClienteAdmin)
 admin.site.register(Numero, NumeroAdmin)
 admin.site.register(PerfilUsuario)
-admin.site.register(Cliente)
-admin.site.register(Comprobantes_de_pago)
 admin.site.register(Cuentas_banco)
 admin.site.register(Vehiculo)
 admin.site.register(ImagenSecundaria)

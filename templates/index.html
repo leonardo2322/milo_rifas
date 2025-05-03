@@ -176,7 +176,7 @@
           <a href="#" target="_blank" title="Sistema de Rifas">
             <br />
           </a>
-          <a href="" class="btn btn-success mb-5" id="ws-btn">
+          <a href="#" class="btn btn-success mb-5" id="ws-btn">
             Whatszapp
             <i class="fa-brands fa-whatsapp"></i>
           </a>
@@ -219,6 +219,7 @@
     <script src="{% static 'sweetAlert/sweetalert2.all.min.js' %}"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
     <script src="{% static 'js/calc_img_slider.js' %}"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script>
        {% if messages %}
       {% for message in messages %}
@@ -241,20 +242,22 @@
         }
       });
     </script>
-    {% endif %} 
+    {% endif %}
     <script>
       document.addEventListener("DOMContentLoaded", function () {
+        // Evita el comportamiento predeterminado del enlace
         const mensage = "{{ mensaje|default:'' }}";
-        const tlf= "{{ usuario.telefono|default:'' }}";
-          
+        const tlf = "{{ usuario_tlfn }}";
         const wsBtn = document.getElementById("ws-btn");
-        if (wsBtn && tlf.trim() !== ""){
-          const enlaceWhatsapp =  `https://wa.me/${tlf}/?text=` + encodeURIComponent(mensage);
+        console.log(wsBtn, tlf, mensage);
+        if (wsBtn && tlf.trim() !== "") {
+          const enlaceWhatsapp =
+            `https://wa.me/${tlf}/?text=` + encodeURIComponent(mensage);
           wsBtn.addEventListener("click", function (event) {
-          event.preventDefault(); // Evita el comportamiento predeterminado del enlace
-          window.open(enlaceWhatsapp, "_blank"); // Abre el enlace en una nueva pestaña
-        });
-      }
+            event.preventDefault(); // Evita el comportamiento predeterminado del enlace
+            window.open(enlaceWhatsapp, "_blank"); // Abre el enlace en una nueva pestaña
+          });
+        }
       });
     </script>
     {% block scripts %} {% endblock scripts %}
