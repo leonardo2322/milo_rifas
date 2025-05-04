@@ -9,6 +9,7 @@ from .models import Numero, Cuentas_banco, Cliente, Comprobantes_de_pago, Vehicu
 from .forms import SeleccionRifaForm
 from utils.creacion_numeros import crear_numeros
 # Register your models here.
+from django.utils.html import format_html
 
 
 class NumeroAdmin(admin.ModelAdmin):
@@ -76,48 +77,34 @@ class ComprobantesDePagoAdmin(admin.ModelAdmin):
     rifa_nombre.admin_order_field = 'rifa__nombre' # Permite ordenar por el nombre de la rifa
 
 
+from django.utils.html import format_html
+
 class ClienteAdmin(admin.ModelAdmin):
     list_display = ('nombre', 'cedula', 'telefono', 'estado', 'generar_factura_button')
     readonly_fields = ('generar_factura_button',)
 
     def generar_factura_button(self, obj):
-        if obj and obj.pk :
+        if obj and obj.pk:
             tiene_comprobante_aprobado = obj.comprobantes.filter(estado='aprobado').exists()
             if tiene_comprobante_aprobado:
                 try:
                     rifa_activa = Rifa.objects.filter(activa=True).first()
-                    vehiculo_activo = None
-                    if rifa_activa:
-                        vehiculo_activo = rifa_activa.premios.first()
-                        if vehiculo_activo and vehiculo_activo.img_p and hasattr(vehiculo_activo.img_p, 'url'):
-                            logo_url = vehiculo_activo.img_p.url
-                        else:
-                            logo_url = staticfiles_storage.url('img/vehiculos/carro.webp')
-                except Exception as e:
+                    vehiculo_activo = rifa_activa.premios.first() if rifa_activa else None
+                    logo_url = vehiculo_activo.img_p.url if vehiculo_activo and vehiculo_activo.img_p else staticfiles_storage.url('img/vehiculos/carro.webp')
+                except:
                     logo_url = staticfiles_storage.url('img/vehiculos/carro.webp')
-                nombre_imagen = json.dumps(logo_url)
-                nombre_cliente = json.dumps(obj.nombre)
-                numeros_cliente = json.dumps(', '.join([str(num.numero) for num in obj.numeros.all()]))
-                
-                
-                return mark_safe(
-                    f'<button id="descargar-factura-{obj.pk}">Descargar Factura</button>'
-                    f'<script>document.addEventListener("DOMContentLoaded", function() {{'
-                    f'  const descargarBtn = document.getElementById("descargar-factura-{obj.pk}");'
-                    f'  if (descargarBtn) {{'
-                    f'    descargarBtn.addEventListener("click", function(event) {{'
-                    f'      event.preventDefault();'
-                    f'      const nombreImagen = {nombre_imagen};'
-                    f'      const nombreCliente = {nombre_cliente};'
-                    f'      const numerosCliente = {numeros_cliente};' 
-                    f'      const descripcionNumeros = "Números asignados: " + {numeros_cliente};'
-                    f'      descargarFactura(nombreImagen, nombreCliente, descripcionNumeros);'
-                    f'    }});'
-                    f'  }}'
-                    f'}});</script>'
+
+                return format_html(
+                    '<button class="descargar-factura" '
+                    'data-imagen="{}" data-cliente="Estimado cliente: {}" data-descripcion="Sus numeros seleccionados: {} con los que participara en la rifa ">'
+                    'Descargar Factura</button>',
+                    logo_url,
+                    obj.nombre,
+                    ', '.join(str(num.numero) for num in obj.numeros.all())
                 )
-            return "Guardar el cliente para generar la lista de números"
-    generar_factura_button.short_description = 'Generar Lista de Números'  
+        return "Guardar el cliente para generar la lista de números"
+    generar_factura_button.short_description = 'Generar Lista de Números'
+
 
 admin.site.register(Comprobantes_de_pago, ComprobantesDePagoAdmin)
 admin.site.register(Cliente, ClienteAdmin)

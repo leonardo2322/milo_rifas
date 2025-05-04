@@ -10,7 +10,10 @@ from .models import Cliente,PerfilUsuario # Ajusta si tu modelo está en otro lu
 def eliminar_sesion_cliente(sender, instance, **kwargs):
     cliente_id_eliminado = instance.id
     sesiones = Session.objects.all()
-
+    numeros_asociados = instance.numeros.all()
+    for numero in numeros_asociados:
+        numero.disponible = True
+        numero.save()
     for sesion in sesiones:
         data = sesion.get_decoded()
         if data.get('cliente_id') == cliente_id_eliminado:

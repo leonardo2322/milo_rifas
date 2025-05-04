@@ -4,6 +4,8 @@ from django.views.generic import ListView,View,FormView
 from django.shortcuts import render, redirect
 from django.urls import reverse_lazy,reverse
 from django.core.paginator import Paginator
+from django.contrib.sessions.models import Session
+
 from django.utils import timezone
 from django.utils.timezone import now
 from django.db import transaction
@@ -16,13 +18,21 @@ from utils.validators_img import validar_formato_imagen
 
 TIEMPO_EXPIRACION = timezone.timedelta(hours=2)
 
+def obtener_numeros_reservados_por_otros_usuarios():
+    sesiones = Session.objects.all()
+    numeros_reservados = []
+    for sesion in sesiones:
+        data = sesion.get_decoded()
+        if 'numeros' in data:
+            numeros_reservados.extend(data['numeros'])
+    return numeros_reservados
 def probar_expiracion(request,timestamp_registro,cliente_id):
     try:
         tiempo_registro = timezone.datetime.fromisoformat(timestamp_registro)
         if timezone.is_naive(tiempo_registro):
             tiempo_registro = timezone.make_aware(tiempo_registro)
     except Exception as e:
-        request.session.flush()
+        request.session.clear()
         Cliente.objects.get(pk=cliente_id).delete()
         return redirect('cliente')
 
@@ -36,7 +46,7 @@ def probar_expiracion(request,timestamp_registro,cliente_id):
             pass
             print("cliente no existe")
             
-            request.session.flush()
+            request.session.clear()
             return redirect('cliente')
     return None 
 
@@ -51,11 +61,10 @@ class Presentacion(ListView):
         context = super().get_context_data(**kwargs)
         superuser_perfil = PerfilUsuario.objects.get(usuario__is_superuser=True)
         telefono_superuser = superuser_perfil.telefono
-        print(telefono_superuser,"telefono superuser")
         imagenes = Vehiculo.objects.first().imagenes_secundarias.all() if Vehiculo.objects.exists() else None
         mensaje = "Hola, estoy interesado en comprar un boleto de la rifa. ¿Podrías ayudarme?";
-        if imagenes:
-            context['imagenes'] = imagenes
+        print(imagenes)
+        context['imagenes'] = imagenes
         context['mensaje'] = mensaje
         context['usuario_tlfn'] = telefono_superuser
         return context
@@ -92,7 +101,6 @@ class VerificarNumerosDisponiblesView(View):
                 'disponibles': False,
                 'no_disponibles': no_disponibles
             })
-
 class ClienteFormView(FormView):
     template_name = 'view/cliente_form.html'
     form_class = Cliente_form
@@ -145,6 +153,7 @@ class Busqueda_cliente(View):
             cliente = get_object_or_404(Cliente, cedula=cedula)
             request.session['cliente_id'] = cliente.id
             request.session['timestamp_registro'] = now().isoformat()
+            print(cliente.estado)
             return JsonResponse({
                 'id': cliente.id,
                 'estado': True
@@ -169,7 +178,7 @@ class SeleccionarNumeroView(View):
 
         # Si no hay timestamp, también redirige (algo falló en el registro)
         if not timestamp_registro:
-            request.session.flush()
+            request.session.clear()
             return redirect('cliente')
 
         # Intenta convertir el timestamp en fecha
@@ -186,27 +195,7 @@ class SeleccionarNumeroView(View):
         return render(request, self.template_name, {'numeros': page_obj})
 
     
-    def post(self, request):
-        cliente_id = request.session.get('cliente_id')
-        timestamp_registro = request.session.get('timestamp_registro')
-        if not cliente_id:
-            return redirect('cliente')
-
-        # Si no hay timestamp, también redirige (algo falló en el registro)
-        if not timestamp_registro:
-            request.session.flush()
-            return redirect('cliente')
-        
-        redireccion = probar_expiracion(request,timestamp_registro,cliente_id)
-        
-        if redireccion:
-            return redireccion
-        numeros_seleccionados = request.POST.get('numeros')
-        if numeros_seleccionados:
-            lista_numeros = [int(n) for n in numeros_seleccionados.split(',') if n.isdigit()]
-            print(lista_numeros,"lista numeros")
-        return redirect('subir_comprobante')
-
+    
 class SubirComprobanteView(View):
     template_name = 'view/pago.html'
 
@@ -216,18 +205,17 @@ class SubirComprobanteView(View):
             return redirect('cliente')
         if 'numeros' not in request.session:
             return redirect('seleccionar_numero')
-        print(request.session['numeros'], 'comprobante')
         timestamp_registro = request.session.get('timestamp_registro')
         redirecion = probar_expiracion(request,timestamp_registro,request.session['cliente_id'])
         if redirecion:
             return redirecion
-        
         cuentas = Cuentas_banco.objects.all()
         form = ComprobanteForm()
         
         
         return render(request, self.template_name, {'form': form, 'cuentas':cuentas})
-
+    
+    @transaction.atomic
     def post(self, request):
         if 'cliente_id' not in request.session or 'numeros' not in request.session:
             return redirect('cliente')
@@ -239,7 +227,7 @@ class SubirComprobanteView(View):
             try:
                 cliente = Cliente.objects.get(pk=cliente_id)
             except Cliente.DoesNotExist:
-                request.session.flush()
+                request.session.clear()
                 return redirect('cliente')
             imagen_comprobante = request.FILES.get('imagen_comprobante')
             if imagen_comprobante:
@@ -256,24 +244,26 @@ class SubirComprobanteView(View):
                 primer_numero = Numero.objects.get(numero=numeros[0])
                 comprobante.rifa = primer_numero.rifa
             except (IndexError, Numero.DoesNotExist):
-                request.session.flush()
+                request.session.clear()
                 return redirect('cliente')
             comprobante.save()
             form.save_m2m()
-            with transaction.atomic():
-                for numero_id in numeros:
-                    try:
-                        numero = Numero.objects.get(numero=numero_id)
-                        cliente.numeros.add(numero)
-                        numero.disponible = False
-                        numero.save()
-                    except Numero.DoesNotExist:
+            for numero_id in numeros:
+                try:
+                    numero = Numero.objects.get(numero=numero_id)
+                    cliente.numeros.add(numero)
+                    numero.disponible = False
+                    numero.save()
+                except Numero.DoesNotExist:
                         # Loggear o manejar el caso en que un número desapareció
-                        pass
+                    pass
             # Limpiar la sesión
-            cliente.activo = True
-            cliente.save() 
-            request.session.flush()
+            try:
+                cliente.estado = True
+                cliente.save()
+            except Exception as e:
+                print("Error al guardar el cliente:", str(e))
+            request.session.clear()
 
             messages.success(request, "se ha subido el comprobante de pago correctamente espera a que sea verificado")
             

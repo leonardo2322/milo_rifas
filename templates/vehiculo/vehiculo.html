@@ -50,7 +50,8 @@
     {% if imagenes %}
       {% for im in imagenes %}
         <div class="carousel-item {% if forloop.first %}active{% endif %}">
-          <img src="{{ im.imagen.url }}" class="d-block w-100 object-fit-cover" alt="Imagen {{ forloop.counter }}" style="max-height: 90vh; object-fit: cover; border-radius: 1rem;">
+          <p>{{ im.imagen.url }}</p>
+          <img src="{{ im.imagen }}" class="d-block w-100 object-fit-cover" alt="Imagen {{ forloop.counter }}" style="max-height: 90vh; object-fit: cover; border-radius: 1rem;">
           <div class="container">
             <div class="carousel-caption">
             </div>

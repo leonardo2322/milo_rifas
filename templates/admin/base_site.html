@@ -2,11 +2,58 @@
 {% load static %}
 
 {% block extrahead %}
-{{ block.super }}
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-<script src="{% static 'js/pdf.js' %}"></script>
+  {{ block.super }}
+  <!-- Cargar librería jsPDF -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <!-- Cargar el script específico de la funcionalidad PDF -->
+  <script src="{% static 'js/pdf.js' %}"></script>
+
+  <!-- Estilos del spinner de carga -->
+  <style>
+    #loadingOverlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.5); /* Fondo oscuro */
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 9999; /* Asegura que esté por encima de todo */
+    }
+
+    .loader {
+      border: 8px solid #f3f3f3; /* Gris claro */
+      border-top: 8px solid #3498db; /* Azul para el spinner */
+      border-radius: 50%;
+      width: 50px;
+      height: 50px;
+      animation: spin 2s linear infinite; /* Animación de rotación */
+    }
+
+    /* Animación de rotación */
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    #loadingOverlay p {
+      color: white;
+      font-size: 18px;
+      margin-top: 20px;
+    }
+  </style>
 {% endblock %}
 
 {% block content %}
-{{ block.super }}
+  {{ block.super }}
+  
+  <!-- Pantalla de carga -->
+  <div id="loadingOverlay" style="display:none;">
+    <div class="loader"></div>
+    <p>Generando la factura... por favor espera.</p>
+  </div>
+
+  <!-- Aquí iría el contenido del Admin o cualquier otro contenido necesario -->
 {% endblock %}
