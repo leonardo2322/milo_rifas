@@ -28,6 +28,7 @@
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
     />
     <link rel="stylesheet" href="{% static 'css/index.css' %}" />
+    <link rel="icon" href="{% static 'favicon.ico' %}" type="image/x-icon" />
     <title>Rifas Milo</title>
   </head>
   <body>
@@ -70,13 +71,15 @@
                 </a>
               </li>
               <li class="nav-item">
-                <a class="nav-link text-white" href="#">Sobre Nosotros</a>
+                <a class="nav-link text-white" href="#sobre_nosotros">
+                  Sobre Nosotros
+                </a>
               </li>
-              <li class="nav-item">
+              <!-- <li class="nav-item">
                 <a class="nav-link text-white" href="#">Verificar Boleto</a>
-              </li>
+              </li> -->
               <li class="nav-item">
-                <a class="nav-link text-white" href="#">Contacto</a>
+                <a class="nav-link text-white" href="#ws-btn">Contacto</a>
               </li>
               <li class="nav-item text-white">
                 <a href="{% url 'cliente' %}" class="golden-button">
@@ -116,11 +119,13 @@
             </p>
           </div>
           <div class="col-lg-3 col-md-6 footer-subsection">
-            <div class="footer-subsection-2-1">
-              <h3 class="footer-subsection-title">Nosotros</h3>
-              <pre><p class="footer-subsection-text">Empres</p></pre>
-            </div>
-          </div>
+    <div class="footer-subsection-2-1">
+        <h3 class="footer-subsection-title">Nosotros</h3>
+        <p class="footer-subsection-text">
+            En Rifas Milo, ofrecemos la oportunidad de ganar increíbles premios de manera sencilla y justa. Nos especializamos en rifas con experiencias emocionantes.
+        </p>
+    </div>
+</div>
           <div class="col-lg-3 col-md-6 footer-subsection">
             <h3 class="footer-subsection-title">Contacto</h3>
             <ul class="footer-subsection-list">
@@ -131,7 +136,7 @@
                   rel="nofollow noopener noreferrer"
                   target="_blank"
                 >
-                  www.rifasmilo@gmail.com
+                  {{ correo }}
                 </a>
               </li>
               <li>Tovar estado Merida</li>
@@ -247,6 +252,8 @@
         // Evita el comportamiento predeterminado del enlace
         const mensage = "{{ mensaje|default:'' }}";
         const tlf = "{{ usuario_tlfn }}";
+        console.log("Telefono: " + tlf);
+        console.log("Mensaje: " + mensage);
         const wsBtn = document.getElementById("ws-btn");
         if (wsBtn && tlf.trim() !== "") {
           const enlaceWhatsapp =

@@ -13,19 +13,20 @@ from django.shortcuts import get_object_or_404
 from django.core.exceptions import ValidationError
 from django.contrib import messages
 from .forms import Cliente_form,ComprobanteForm
-from .models import Vehiculo, Numero,Cliente,Cuentas_banco,PerfilUsuario
+from .models import Vehiculo, Numero,Cliente,Cuentas_banco,PerfilUsuario,ReservaTemporal
 from utils.validators_img import validar_formato_imagen
 
 TIEMPO_EXPIRACION = timezone.timedelta(hours=2)
 
-def obtener_numeros_reservados_por_otros_usuarios():
-    sesiones = Session.objects.all()
-    numeros_reservados = []
-    for sesion in sesiones:
-        data = sesion.get_decoded()
-        if 'numeros' in data:
-            numeros_reservados.extend(data['numeros'])
-    return numeros_reservados
+def liberar_reservas_cliente(request):
+    if request.method == "POST":
+        cliente_id = request.session.get('cliente_id')
+        if cliente_id:
+            ReservaTemporal.objects.filter(cliente_id=cliente_id).delete()
+            return JsonResponse({'success': True})
+        return JsonResponse({'success': False, 'error': 'No hay cliente'}, status=400)
+    return JsonResponse({'error': 'Método no permitido'}, status=405)
+    
 def probar_expiracion(request,timestamp_registro,cliente_id):
     try:
         tiempo_registro = timezone.datetime.fromisoformat(timestamp_registro)
@@ -59,48 +60,56 @@ class Presentacion(ListView):
         return Vehiculo.objects.filter(rifa__activa=True)
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        superuser_perfil = PerfilUsuario.objects.get(usuario__is_superuser=True)
-        telefono_superuser = superuser_perfil.telefono
         imagenes = Vehiculo.objects.first().imagenes_secundarias.all() if Vehiculo.objects.exists() else None
-        mensaje = "Hola, estoy interesado en comprar un boleto de la rifa. ¿Podrías ayudarme?";
-        print(imagenes)
         context['imagenes'] = imagenes
-        context['mensaje'] = mensaje
-        context['usuario_tlfn'] = telefono_superuser
         return context
 
 class VerificarNumerosDisponiblesView(View):
     def post(self, request, *args, **kwargs):
-        # Obtener los números seleccionados desde el body de la solicitud
         data = json.loads(request.body)
         numeros_seleccionados = data.get('numeros', [])
         cliente_id = request.session.get('cliente_id')
-        print(cliente_id)
         time = data.get('time_stamp', None)
-        # Verificar si los números están disponibles
-        redireccion = probar_expiracion(request,time,cliente_id)
+
+        redireccion = probar_expiracion(request, time, cliente_id)
         if redireccion:
-            print(redireccion,"redireccion")
             return redireccion
+
         disponibles = []
         no_disponibles = []
+
         for numero in numeros_seleccionados:
-            if Numero.objects.filter(numero=numero, disponible=True).exists():
-                disponibles.append(numero)
+            numero_obj = Numero.objects.filter(numero=numero).first()
+            if numero_obj and numero_obj.disponible:
+                reserva_existente = ReservaTemporal.objects.filter(
+                    numero=numero_obj,
+                    expiracion__gt=timezone.now()
+                ).exists()
+                if not reserva_existente:
+                    disponibles.append(numero_obj.numero)
+
+                    # Crear reserva temporal
+                    ReservaTemporal.objects.create(
+                        cliente_id=cliente_id,
+                        numero=numero_obj,
+                        expiracion=timezone.now() + timezone.timedelta(minutes=30)  # tiempo configurable
+                    )
+                else:
+
+                    no_disponibles.append(numero)
             else:
                 no_disponibles.append(numero)
 
-
-        # Enviar una respuesta al cliente
         if len(disponibles) == len(numeros_seleccionados):
             self.request.session['numeros'] = disponibles
             return JsonResponse({'disponibles': True})
         else:
-           self.request.session.pop('numeros', None)  # Limpiar la sesión si no están todos disponibles
-           return JsonResponse({
+            self.request.session.pop('numeros', None)
+            return JsonResponse({
                 'disponibles': False,
                 'no_disponibles': no_disponibles
             })
+
 class ClienteFormView(FormView):
     template_name = 'view/cliente_form.html'
     form_class = Cliente_form
@@ -180,12 +189,17 @@ class SeleccionarNumeroView(View):
         if not timestamp_registro:
             request.session.clear()
             return redirect('cliente')
-
+        is_paginacion = request.GET.get('page') is not None
         # Intenta convertir el timestamp en fecha
         redireccion = probar_expiracion(request,timestamp_registro,cliente_id)
 
         if redireccion:
             return redireccion
+        if not is_paginacion:
+            reserva_temporal = ReservaTemporal.objects.filter(cliente_id=cliente_id).first()
+
+            if reserva_temporal:
+                ReservaTemporal.objects.filter(cliente_id=cliente_id).delete()
         # Si todo está bien, muestra los números disponibles
         numeros = Numero.objects.all().order_by('numero')
         paginator = Paginator(numeros, 100)
@@ -212,7 +226,7 @@ class SubirComprobanteView(View):
         cuentas = Cuentas_banco.objects.all()
         form = ComprobanteForm()
         
-        
+        print(request.session['numeros'],"numeros", )
         return render(request, self.template_name, {'form': form, 'cuentas':cuentas})
     
     @transaction.atomic
@@ -254,10 +268,12 @@ class SubirComprobanteView(View):
                     cliente.numeros.add(numero)
                     numero.disponible = False
                     numero.save()
+
+                    # Eliminar cualquier reserva temporal de este número
+                    ReservaTemporal.objects.filter(numero=numero, cliente_id=cliente.pk).delete()
+
                 except Numero.DoesNotExist:
-                        # Loggear o manejar el caso en que un número desapareció
                     pass
-            # Limpiar la sesión
             try:
                 cliente.estado = True
                 cliente.save()

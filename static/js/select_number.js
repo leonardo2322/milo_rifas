@@ -15,7 +15,6 @@ document.addEventListener("DOMContentLoaded", () => {
 let seleccionados = [];
 const inputNumeros = document.getElementById("input-numeros");
 const tiempo_seleccion = document.getElementById("time_stamp");
-
 function toggleSelection(btn) {
   console.log("Botón clicado:", btn);
   btn.classList.remove("btn-outline-warning");
@@ -31,7 +30,25 @@ function toggleSelection(btn) {
   }
   inputNumeros.value = JSON.stringify(seleccionados);
   tiempo_seleccion.value = time_stamp;
+
+  actualizarNumerosSeleccionados();
   // Guardar la selección con un timestamp para control de expiración
+}
+function actualizarNumerosSeleccionados() {
+  const contenedor = document.getElementById("numeros-seleccion");
+  contenedor.innerHTML = ""; // Limpiar el contenedor antes de agregar los números
+
+  if (seleccionados.length > 0) {
+    seleccionados.forEach((numero) => {
+      const li = document.createElement("li");
+      li.textContent = numero;
+      contenedor.appendChild(li);
+    });
+  } else {
+    const li = document.createElement("li");
+    li.textContent = "No has seleccionado ningún número aún.";
+    contenedor.appendChild(li);
+  }
 }
 
 function verificarDisponibilidadYFinalizar(event) {
@@ -91,13 +108,13 @@ function verificarDisponibilidadYFinalizar(event) {
       .then((data) => {
         if (data.disponibles) {
           // Si los números están disponibles, redirige a la vista de comprobante
-          console.log("Números disponibles:", data.disponibles, data);
+          localStorage.setItem("paso_por_comprobante", "true");
           window.location.href = "/comprobante/";
         } else {
           const noDisponibles = data.no_disponibles.join(", ");
           mostrarAlerta(
             `Algunos de los números seleccionados no están disponibles: ${noDisponibles}. Por favor, elige otros.`,
-            "Selección vacía",
+            "Numero no disponible",
             "warning"
           );
         }
@@ -118,3 +135,28 @@ function verificarDisponibilidadYFinalizar(event) {
     );
   }
 }
+
+window.addEventListener("pageshow", function (event) {
+  if (event.persisted) {
+    const csrfToken = document.getElementById("csrf-token").value;
+    // Si la página fue restaurada desde el caché, recarga el contenido
+    fetch("/liberar-reservas/", {
+      method: "POST",
+      headers: {
+        "X-CSRFToken": csrfToken, // Asegúrate de tener este token si no usas @csrf_exempt
+        "Content-Type": "application/json",
+      },
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        if (data.success) {
+          console.log("Reservas liberadas con éxito");
+        } else {
+          console.warn("No se pudo liberar reservas:", data.error);
+        }
+      })
+      .catch((error) => {
+        console.error("Error al liberar reservas:", error);
+      });
+  }
+});

@@ -50,8 +50,7 @@
     {% if imagenes %}
       {% for im in imagenes %}
         <div class="carousel-item {% if forloop.first %}active{% endif %}">
-          <p>{{ im.imagen.url }}</p>
-          <img src="{{ im.imagen }}" class="d-block w-100 object-fit-cover" alt="Imagen {{ forloop.counter }}" style="max-height: 90vh; object-fit: cover; border-radius: 1rem;">
+          <img src="{{ im.imagen.url }}" class="d-block w-100 object-fit-cover" alt="Imagen {{ forloop.counter }}" style="max-height: 90vh; object-fit: cover; border-radius: 1rem;">
           <div class="container">
             <div class="carousel-caption">
             </div>
@@ -81,7 +80,7 @@
   </button>
 </div>
 <div>
-  <p class="text-center"> 
+  <p class="text-center" id="sobre_nosotros"> 
     {% with vehiculos|first as vehiculo %}
     {% if vehiculo.rifa.activa %}
 
@@ -93,7 +92,7 @@
     {% endif %}
     {% endwith %}
   </p>
-  <h1 class="title text-center">¿Por qué elegirnos?</h1>
+  <h1 class="title text-center" id="sobre_nosotros">¿Por qué elegirnos?</h1>
   <p class="text-center">¡Porque somos la mejor opción para hacer tus sueños realidad!</p>
 
   

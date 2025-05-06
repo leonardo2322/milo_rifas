@@ -1,9 +1,8 @@
-import io
-import os
 from django.db import models
 from django.core.validators import RegexValidator
 from django.contrib.auth.models import User
-
+from django.utils import timezone
+from datetime import timedelta
 class PerfilUsuario(models.Model):
     usuario = models.OneToOneField(User, on_delete=models.CASCADE, related_name='perfil',blank=True, null=True)
     permisos_especiales = models.ManyToManyField('auth.Permission', blank=True)
@@ -43,12 +42,17 @@ class Numero(models.Model):
         self.cliente = None
         self.save()
 
-class Imagen_bn_impresion(models.Model):
-    imagen = models.ImageField(upload_to='impresion/')
-    creado_en = models.DateTimeField(auto_now_add=True)
+def tiempo_expiracion():
+    """Devuelve la fecha y hora actual más 10 minutos."""
+    return timezone.now() + timedelta(minutes=10)
 
-    def __str__(self):
-        return f"Imagen #{self.id}"
+class ReservaTemporal(models.Model):
+    numero = models.ForeignKey('Numero', on_delete=models.CASCADE)
+    cliente_id = models.IntegerField()  # mismo que session['cliente_id']
+    expiracion = models.DateTimeField(default=tiempo_expiracion)
+
+    def is_expired(self):
+        return timezone.now() > self.expiracion
 
 class Rifa(models.Model):
     title = models.CharField(max_length=255, default='¡Tu oportunidad de Oro! Este espectacular carro puede ser tuyo.')
@@ -76,6 +80,7 @@ class Vehiculo(models.Model):
 
 class ImagenSecundaria(models.Model):
     carro = models.ForeignKey(Vehiculo, related_name='imagenes_secundarias', on_delete=models.CASCADE)
+    descripcion = models.CharField(max_length=255, blank=True, null=True)
     imagen = models.ImageField(upload_to='carro/secundarias/')
 
     def __str__(self):

@@ -1,6 +1,4 @@
-{% extends "index.html" %} 
-{% load static %} 
-{% block content %}
+{% extends "index.html" %} {% load static %} {% block content %}
 <h1
   style="
     font-family: Lobster;
@@ -107,10 +105,13 @@
     finalizar este proceso.
   </strong>
 </p>
-
-{% endblock content %} 
-{% block scripts %}
- {{ block.super }}
+<div>
+  <h3>Tus Números seleccionados:</h3>
+  <ul id="numeros-seleccion" class="list-group ">
+    
+  </ul>
+</div>
+{% endblock content %} {% block scripts %} {{ block.super }}
 <script type="module" src="{% static 'js/select_number.js' %}"></script>
 
 {% endblock scripts %}

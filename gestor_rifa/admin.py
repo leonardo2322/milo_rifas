@@ -102,7 +102,7 @@ class ClienteAdmin(admin.ModelAdmin):
                     obj.nombre,
                     ', '.join(str(num.numero) for num in obj.numeros.all())
                 )
-        return "Guardar el cliente para generar la lista de números"
+        return "aprobar comprobante del cliente para generar la factura"
     generar_factura_button.short_description = 'Generar Lista de Números'
 
 

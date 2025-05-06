@@ -288,6 +288,18 @@
   outline-offset: 5px;
   background-color: #fff;
 }
+.footer-subsection-text {
+  word-wrap: break-word; /* Rompe las palabras largas para evitar el desbordamiento */
+  overflow: hidden; /* Oculta el contenido que se desborda */
+  white-space: normal; /* Asegura que el texto se ajuste dentro del contenedor */
+  font-size: 1rem; /* Tamaño de fuente adecuado */
+}
+
+@media (max-width: 768px) {
+  .footer-subsection-text {
+    font-size: 0.9rem; /* Reduce el tamaño de la fuente en pantallas más pequeñas */
+  }
+}
 @keyframes radial-pulse {
   0% {
     background-position: 50% 50%;

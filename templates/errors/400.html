@@ -1,0 +1,6 @@
+{% extends 'index.html' %}
+{% block content %}
+<h1>Ocurrió un error inesperado solicitud incorrecta verifica y vuelve a intentarlo o recarga la pantalla de nuevo</h1>
+<p>{{ form }}</p>
+<a href="{% url 'inicio' %}">Volver al inicio</a>
+{% endblock %}
